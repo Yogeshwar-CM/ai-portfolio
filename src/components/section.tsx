@@ -38,7 +38,7 @@ export function Section({
           </h2>
 
           {lede ? (
-            <p className="pretty mt-4 max-w-2xl text-[0.975rem] leading-relaxed text-muted">
+            <p className="pretty measure mt-4 text-[0.975rem] leading-relaxed text-muted">
               {lede}
             </p>
           ) : null}

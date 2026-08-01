@@ -59,6 +59,7 @@
   }
 
   body {
+    position: relative;
     background-color: var(--ink-950);
     color: var(--text);
     font-family: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
@@ -158,11 +159,22 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  .field {
-    position: fixed;
-    inset: 0;
+  /* Anchored to the top of the document, not the viewport — the atmosphere
+     belongs to the hero and scrolls away with it. */
+  .atmos {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: min(1000px, 130svh);
+    overflow: hidden;
     z-index: 0;
     pointer-events: none;
+  }
+
+  .field {
+    position: absolute;
+    inset: 0;
     background-image: linear-gradient(var(--line) 1px, transparent 1px),
       linear-gradient(90deg, var(--line) 1px, transparent 1px);
     background-size: 64px 64px;
@@ -176,14 +188,12 @@
       #000 0%,
       transparent 75%
     );
-    opacity: 0.5;
+    opacity: 0.55;
   }
 
   .aurora {
-    position: fixed;
+    position: absolute;
     inset: 0;
-    z-index: 0;
-    pointer-events: none;
     background:
       radial-gradient(
         ellipse 60% 40% at 50% -10%,
@@ -216,7 +226,18 @@
     font-size: 0.6875rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
     color: var(--text-faint);
+  }
+
+  /* Reading measure. Long-form prose stops being readable past ~70 characters
+     regardless of how much column the grid hands it. */
+  .measure {
+    max-width: 66ch;
+  }
+
+  .measure-lead {
+    max-width: 54ch;
   }
 
   .serif {
@@ -259,6 +280,22 @@
       transparent
     );
     pointer-events: none;
+  }
+
+  /* Closing glow behind the contact block. Needs a stacking context on the
+     parent (position + z-index) so the negative index stays contained. */
+  .halo {
+    position: absolute;
+    inset-inline: 0;
+    bottom: -10%;
+    height: 80%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 55% 65% at 50% 100%,
+      rgba(110, 231, 249, 0.07),
+      transparent 70%
+    );
   }
 
   .hairline {
@@ -385,8 +422,23 @@
     background: rgba(255, 255, 255, 0.025);
     font-family: var(--font-mono-var), ui-monospace, monospace;
     font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
     color: var(--text-muted);
     white-space: nowrap;
+  }
+
+  /* Card hover: a 2px rise reads as responsive without becoming a bounce. */
+  .lift {
+    transition:
+      transform 400ms var(--ease),
+      border-color 300ms ease,
+      box-shadow 400ms var(--ease);
+  }
+
+  .lift:hover,
+  .lift:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 44px -28px rgba(0, 0, 0, 0.9);
   }
 
   /* ---- Motion ---- */
@@ -394,15 +446,21 @@
   [data-reveal] {
     opacity: 0;
     transform: translateY(14px);
+    /* The defocus is what separates this from a plain fade — it reads as the
+       content settling rather than switching on. Cleared once it lands so no
+       element is left rasterized behind a filter. */
+    filter: blur(5px);
     transition:
       opacity 700ms var(--ease),
-      transform 700ms var(--ease);
+      transform 700ms var(--ease),
+      filter 500ms var(--ease);
     transition-delay: var(--reveal-delay, 0ms);
   }
 
   [data-reveal="in"] {
     opacity: 1;
     transform: none;
+    filter: none;
   }
 
   .dot-live {
@@ -438,5 +496,16 @@
   [data-reveal] {
     opacity: 1 !important;
     transform: none !important;
+    filter: none !important;
+  }
+}
+
+/* Without this, a visitor with JS disabled gets a blank page: the reveal state
+   is CSS, but only JS ever clears it. Unlayered so it beats the base rule. */
+@media (scripting: none) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
 }

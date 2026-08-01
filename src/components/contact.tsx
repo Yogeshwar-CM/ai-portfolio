@@ -39,6 +39,7 @@ export function Contact() {
       aria-labelledby="contact-title"
       className="relative z-10 scroll-mt-24 border-t border-line/70 py-20 md:py-28"
     >
+      <div className="halo" aria-hidden="true" />
       <div className="shell">
         <Reveal>
           <div className="flex items-center gap-4">

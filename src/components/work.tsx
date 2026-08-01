@@ -11,7 +11,7 @@ function WorkCard({ project, index }: { project: Project; index: number }) {
   const external = !project.study;
 
   return (
-    <Spotlight className="glass group relative overflow-hidden transition-colors duration-300 hover:border-line-strong">
+    <Spotlight className="glass lift group relative overflow-hidden hover:border-line-strong">
       <span
         aria-hidden="true"
         className="pointer-events-none absolute -right-2 -top-6 select-none font-mono text-[5.5rem] font-medium leading-none text-white/[0.025] md:text-[7rem]"
@@ -120,7 +120,7 @@ export function Work() {
       index="01"
       label="Selected work"
       title="Things I built, and what actually came out of them."
-      lede="Two of these shipped, one won a grand prize, and none of them come with invented metrics. Where the detail sits behind a company login, I say so instead of dressing it up."
+      lede="Three of these shipped to real users, one won a grand prize, and none of them come with invented metrics. Where the detail sits behind a company login, I say so instead of dressing it up."
     >
       <div className="space-y-5">
         {featured.map((project, i) => (
@@ -152,7 +152,7 @@ export function Work() {
                 href={repo.repo}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="glass group flex items-center justify-between gap-3 px-4 py-4 transition-colors duration-300 hover:border-line-strong"
+                className="glass lift group flex items-center justify-between gap-3 px-4 py-4 hover:border-line-strong"
               >
                 <span className="min-w-0">
                   <span className="block truncate font-mono text-[0.82rem] text-text">

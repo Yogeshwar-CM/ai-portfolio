@@ -166,7 +166,50 @@ export const projects: Project[] = [
       "Shipped the full paid-course path: sign up, buy, learn, get a certificate that can be verified by a third party.",
     stack: ["React", "Firebase Auth", "Razorpay", "AWS S3"],
     role: "Full-stack intern (Jan – Mar 2024)",
-    featured: false,
+    featured: true,
+    study: {
+      intro:
+        "My first internship where the software took money. Mastervance is a course platform — you sign up, you buy a course, you learn, and at the end you get a certificate someone else can verify. I built that path front to back over three months.",
+      sections: [
+        {
+          heading: "The path that had to work",
+          body: [
+            "A course platform is four features wearing a trench coat: an identity system, a catalogue, a payment, and a credential. Each one is boring alone. The interesting part is that they form a chain, and a break anywhere in it looks identical to the user — they paid and nothing happened.",
+            "So the design goal was never elegance. It was that every step could be re-entered. Refresh mid-checkout, close the tab after paying, come back a week later for the certificate — none of those should need a human to fix the account.",
+          ],
+        },
+        {
+          heading: "What each piece did",
+          body: [
+            "Firebase handled auth, which meant I did not have to invent session handling on a three-month timeline — a good trade when the risky part of the product is elsewhere. React carried the front end and the course delivery flow.",
+            "Razorpay took the payments. AWS S3 stored course media and the generated certificates, which let verification be a plain URL lookup instead of a lookup against something that could drift out of sync with the file.",
+            "Certificate verification was the part I most enjoyed getting right. A certificate is worthless if the only proof is the PDF itself, so the verifiable artefact has to be the record, not the file the learner is holding.",
+          ],
+        },
+        {
+          heading: "What it taught me",
+          body: [
+            "Money moving through code you wrote changes your testing habits faster than any lecture. Before this, a bug was something that made a screen look wrong. After it, a bug was something that could take ₹2,000 from someone and leave them with no course and no receipt.",
+            "The specific lesson was about trusting a callback. A payment provider tells you it succeeded, and the temptation is to unlock the course right there in the browser. The correct answer is that the client is a bystander — the server confirms with the provider, and the client just displays the outcome.",
+          ],
+        },
+        {
+          heading: "What I'd do differently",
+          body: [
+            "Model the enrolment as a state machine on day one instead of as a boolean that gets flipped. Half the edge cases I hit — paid-but-not-enrolled, enrolled-but-no-certificate — were states that already existed in reality and just had no name in my schema.",
+            "Log the payment lifecycle properly from the start. When something did go wrong, my ability to explain it depended entirely on whether I happened to have logged that step.",
+          ],
+        },
+      ],
+      facts: [
+        { label: "Type", value: "Course platform" },
+        { label: "Role", value: "Full-stack intern" },
+        { label: "Period", value: "Jan – Mar 2024" },
+        { label: "Auth", value: "Firebase" },
+        { label: "Payments", value: "Razorpay" },
+        { label: "Media & certs", value: "AWS S3" },
+      ],
+    },
   },
 ];
 

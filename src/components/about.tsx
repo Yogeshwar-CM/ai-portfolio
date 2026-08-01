@@ -19,7 +19,7 @@ export function About() {
     >
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
         <Reveal className="lg:col-span-7">
-          <div className="space-y-5 text-[1rem] leading-[1.75] text-muted">
+          <div className="measure space-y-5 text-[1rem] leading-[1.75] text-muted">
             <p className="pretty">
               I&apos;m Yogeshwar — based in Thiruporur, just outside Chennai. I
               got here the ordinary way: built things, broke them, sat with the

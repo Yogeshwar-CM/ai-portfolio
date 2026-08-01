@@ -89,6 +89,11 @@ export default function RootLayout({
         >
           Skip to content
         </a>
+        {/* Belt-and-braces for the `scripting: none` rule in globals.css,
+            which older Safari and Firefox don't support. */}
+        <noscript>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
+        </noscript>
         <Background />
         <Nav />
         <div id="top" />
