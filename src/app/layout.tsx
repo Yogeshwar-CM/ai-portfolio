@@ -10,11 +10,13 @@ import { Footer } from "@/components/footer";
    technical documentation, which is what this is. Plex Mono carries every
    label, figure and index, so metadata never competes with reading text.
    Fraunces is the only voice: name, headings, pull quotes. */
+/* 400 and 500 only, and no italic: the design sets every emphasis in Fraunces
+   or in mono, so the 600 and the four italic files were three quarters of the
+   sans payload downloaded to render nothing. */
 const sans = IBM_Plex_Sans({
   variable: "--font-sans-var",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
+  weight: ["400", "500"],
   display: "swap",
 });
 

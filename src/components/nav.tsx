@@ -46,7 +46,10 @@ export function Nav() {
     };
   }, []);
 
-  /* Highlight the section crossing the middle of the viewport. */
+  /* Highlight the section crossing the middle of the viewport.
+     Membership is tracked as a set rather than "whichever fired last", so that
+     scrolling back up past the first section clears the marker instead of
+     leaving Work lit while the reader is looking at the hero. */
   useEffect(() => {
     const ids = nav.map((item) => item.href.split("#")[1]);
     const sections = ids
@@ -55,11 +58,15 @@ export function Nav() {
 
     if (!sections.length || typeof IntersectionObserver === "undefined") return;
 
+    const inBand = new Set<string>();
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) setActive(entry.target.id);
+          if (entry.isIntersecting) inBand.add(entry.target.id);
+          else inBand.delete(entry.target.id);
         }
+        setActive(ids.find((id) => inBand.has(id)) ?? null);
       },
       { rootMargin: "-45% 0px -50% 0px" },
     );
@@ -95,6 +102,7 @@ export function Nav() {
 
   return (
     <header
+      data-print="hide"
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-200 ${
         scrolled || open
           ? "border-b border-rule bg-paper"
@@ -148,7 +156,10 @@ export function Nav() {
             href={`mailto:${site.email}`}
             className="label link-quiet hidden sm:inline"
           >
-            Email ↗
+            Email
+            {/* Decorative — and a mailto opens a mail client, not a tab, so
+                there is nothing useful to announce in its place. */}
+            <span aria-hidden="true"> ↗</span>
           </a>
           <button
             ref={toggleRef}

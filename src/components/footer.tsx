@@ -37,7 +37,7 @@ export function Footer() {
           <a href={`mailto:${site.email}`} className="label link-quiet">
             Email
           </a>
-          <Link href="#top" className="label link-quiet">
+          <Link href="#top" className="label link-quiet" data-print="hide">
             Top ↑
           </Link>
         </div>

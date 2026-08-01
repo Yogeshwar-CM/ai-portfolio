@@ -125,7 +125,11 @@
     text-rendering: optimizeLegibility;
     font-feature-settings: "calt" 1, "liga" 1;
     font-optical-sizing: auto;
+    /* `hidden` makes the body a scroll container, which silently breaks the
+       sticky case-study rail. `clip` does the same containment without one —
+       the `hidden` line stays as the fallback for browsers that predate it. */
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   ::selection {
@@ -348,6 +352,16 @@
     border-top: 1px solid var(--rule-strong);
     border-bottom: 1px solid var(--rule-strong);
     padding-block: 1.4rem;
+  }
+
+  /* Where the browser can hang the mark itself it does a better job than a
+     fixed indent can — the offset tracks the actual glyph. The two would
+     stack, so the manual indent is handed back at the same time. */
+  @supports (hanging-punctuation: first) {
+    .pull {
+      text-indent: 0;
+      hanging-punctuation: first;
+    }
   }
 
   /* ---- Rules & tables ---- */
@@ -634,5 +648,149 @@
   [data-reveal] {
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   Print
+   --------------------------------------------------------------------------
+   A recruiter who wants this on paper presses Ctrl-P, and until now got the
+   screen: navigation bar over the first heading, folded work entries that
+   printed as titles with nothing under them, and — on a machine set to dark —
+   a solid black page. The page is already composed as a document, so printing
+   it is mostly a matter of getting out of the way.
+
+   Below `lg` the layout is already a single column and the work entries are
+   already open, and print lays out at roughly 816px, so the screen rules do
+   most of this. What is left is the chrome, the colour, and the page breaks.
+   ========================================================================== */
+
+@media print {
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  /* Ink on white regardless of the reader's system theme. A dark-mode visitor
+     hitting print should not get a black page, and the grain's blend mode is
+     meaningless on paper. */
+  :root {
+    --paper: #ffffff;
+    --paper-raised: #ffffff;
+    --paper-sunk: #ffffff;
+    --ink: #000000;
+    --ink-muted: #26221c;
+    --ink-faint: #4a443b;
+    --rule: rgba(0, 0, 0, 0.25);
+    --rule-strong: rgba(0, 0, 0, 0.5);
+    --accent: #7a2c10;
+    --accent-deep: #7a2c10;
+    --accent-wash: transparent;
+    color-scheme: light;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 10.5pt;
+    line-height: 1.5;
+  }
+
+  /* Screen furniture: the masthead, the grain, the scroll progress, and every
+     control that does nothing once it is ink. */
+  .grain,
+  [data-print="hide"],
+  .anchor {
+    display: none !important;
+  }
+
+  /* A button that scrolls the page, or opens a mail client, is nothing on
+     paper. One that points at a repo is a URL worth keeping — so it loses the
+     box and prints as a line of text, and the rule below gives it its href. */
+  .btn:not([href^="http"]) {
+    display: none !important;
+  }
+
+  .btn[href^="http"] {
+    display: inline !important;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none !important;
+    color: #000 !important;
+    text-decoration: underline;
+  }
+
+  /* Nothing is mid-animation on paper. */
+  [data-reveal],
+  .word {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  /* Every fold open — a work index that prints titles with nothing under them
+     is worse than no work index. */
+  .entry-body {
+    grid-template-rows: 1fr !important;
+    opacity: 1 !important;
+  }
+
+  .entry-body > div {
+    overflow: visible !important;
+  }
+
+  details {
+    display: none !important;
+  }
+
+  /* The sticky rail has nothing to stick to on a sheet of paper. */
+  .lg\:sticky {
+    position: static !important;
+  }
+
+  /* A link on paper is just text unless it says where it goes. Only external
+     ones: a mailto already prints its address as the link text, and the
+     in-page anchors point at somewhere the reader is holding. */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-family: var(--font-mono-var), monospace;
+    font-size: 0.78em;
+    letter-spacing: 0;
+    color: #4a443b;
+    word-break: break-all;
+  }
+
+  /* A heading stranded at the foot of a page, or one line of a paragraph
+     carried onto the next, is the tell that nobody checked the print view. */
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+    break-inside: avoid;
+  }
+
+  p,
+  li,
+  blockquote,
+  .pull {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .entry,
+  .dossier > div,
+  figure {
+    break-inside: avoid;
+  }
+
+  section {
+    break-before: auto;
+  }
+
+  /* Rules are the whole visual system here; without this the browser drops
+     every one of them and the document loses its structure. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

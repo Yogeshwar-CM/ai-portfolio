@@ -1,6 +1,7 @@
 import { site } from "@/data/site";
 import { Section } from "@/components/section";
 import { Reveal } from "@/components/reveal";
+import { NewTab } from "@/components/new-tab";
 
 const channels = [
   { label: "GitHub", handle: "Yogeshwar-CM", href: site.links.github },
@@ -49,7 +50,7 @@ export function Contact() {
                     className="link"
                   >
                     {handle}
-                    <span aria-hidden="true"> ↗</span>
+                    <NewTab />
                   </a>
                 </dd>
               </div>

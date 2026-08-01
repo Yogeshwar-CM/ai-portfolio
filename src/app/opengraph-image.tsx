@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { frauncesTTF, og } from "./og-font";
+import { charset, frauncesTTF, og } from "./og-font";
 
 export const alt = "Yogeshwar CM — AI Engineer, production agentic systems";
 export const size = { width: 1200, height: 630 };
@@ -14,7 +14,16 @@ const name = "Yogeshwar CM";
  * that is mostly dark cards.
  */
 export default async function OpengraphImage() {
-  const fonts = await frauncesTTF(name);
+  const fonts = await frauncesTTF(
+    charset(
+      name,
+      "Available for AI engineering roles",
+      "Chennai, IN",
+      "AI Engineer at Pickyourtrail — production agentic systems. B.Tech CSE (AI & ML), HITS Chennai.",
+      "github.com/Yogeshwar-CM",
+      "Selected work · Case studies",
+    ),
+  );
 
   return new ImageResponse(
     (

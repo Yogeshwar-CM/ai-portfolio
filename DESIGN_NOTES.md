@@ -95,6 +95,27 @@ snapping, since a zero-duration expansion is the jitter the preference is
 asking about. A `scripting: none` rule and a `<noscript>` block keep the page
 from rendering blank without JS.
 
+## Print
+
+The page is composed as a document, so it should survive being one. `Ctrl-P`
+used to produce the screen: the fixed masthead sitting over the first heading,
+work entries printed as titles with nothing under them, and — on a machine set
+to dark — a solid black sheet.
+
+The print layer is the last block in `globals.css` and does four things. It
+repaints the tokens as ink on white, so the theme a reader happens to be using
+never reaches the paper. It drops the furniture: masthead, grain, scroll
+progress, the sticky rail, the in-page anchors, and any button that only scrolls
+the page — a `.btn` pointing at a repo instead loses its box and prints as a
+line, because the URL is the part worth keeping. It opens every fold and clears
+every reveal, since none of that means anything once it is ink. And it sets
+`orphans`/`widows` to 3 and keeps headings with the text under them.
+
+Below `lg` the layout is already a single column with the work entries open, and
+print lays out at roughly 816px, so the screen rules do most of the work. What
+is left is colour, chrome and page breaks. External links print their href after
+the text; `mailto:` links already print their address as the link text.
+
 ## What was killed
 
 - The cyan accent (`#6ee7f9`) and everything tuned to it

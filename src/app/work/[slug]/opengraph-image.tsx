@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { projects, studies } from "@/data/projects";
 import { site } from "@/data/site";
-import { frauncesTTF, og } from "@/app/og-font";
+import { charset, frauncesTTF, og } from "@/app/og-font";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -30,7 +30,9 @@ export default async function CaseStudyImage({
     ? [project.kind, project.year, project.role].join("  ·  ")
     : site.role;
   const stack = project?.stack.slice(0, 5) ?? [];
-  const fonts = await frauncesTTF(title);
+  const fonts = await frauncesTTF(
+    charset(title, summary, meta, stack.join(" "), site.name, "Case study", site.url),
+  );
 
   return new ImageResponse(
     (

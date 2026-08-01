@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Project } from "@/data/projects";
+import { NewTab } from "@/components/new-tab";
 
 /**
  * One line of the work index. A contents page, not a card: index number,
@@ -40,9 +41,8 @@ export function WorkEntry({
             >
               {project.title}
               {external ? (
-                <span aria-hidden="true" className="t-sm align-middle">
-                  {" "}
-                  ↗
+                <span className="t-sm align-middle">
+                  <NewTab />
                 </span>
               ) : null}
             </Link>
@@ -91,7 +91,8 @@ export function WorkEntry({
                       rel="noreferrer noopener"
                       className="label link-quiet"
                     >
-                      Repo ↗
+                      Repo
+                      <NewTab />
                     </a>
                   ) : null}
                   {project.href && !project.repo ? (
@@ -101,7 +102,8 @@ export function WorkEntry({
                       rel="noreferrer noopener"
                       className="label link-quiet"
                     >
-                      Visit ↗
+                      Visit
+                      <NewTab />
                     </a>
                   ) : null}
                 </span>

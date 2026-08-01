@@ -10,6 +10,24 @@
  * worse card, but a build that fails because a font CDN blipped is a worse
  * outcome than that.
  */
+/**
+ * The exact character set a card needs, as one string for the `text=` request.
+ *
+ * Satori is handed a single face, so it sets *everything* on the card in
+ * Fraunces — but the subsetter only returns the glyphs that were asked for,
+ * and anything missing silently renders from a fallback. That was visible on
+ * the study cards: passing only the title meant the running heads came back
+ * with half their letters in another face, most obviously the A of
+ * "AI ENGINEER" and the S of "CASE STUDY".
+ *
+ * The uppercase forms have to be asked for by name — `textTransform` happens
+ * at render time, long after the subset has been fetched.
+ */
+export function charset(...parts: (string | undefined)[]) {
+  const text = parts.filter(Boolean).join(" ");
+  return [...new Set(`${text}${text.toUpperCase()}`)].sort().join("");
+}
+
 export async function frauncesTTF(text: string) {
   const family = "Fraunces:opsz,wght@144,500";
   const api = `https://fonts.googleapis.com/css2?family=${family}&text=${encodeURIComponent(text)}`;

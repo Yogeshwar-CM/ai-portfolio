@@ -6,6 +6,7 @@ import { site } from "@/data/site";
 import { Reveal } from "@/components/reveal";
 import { StudyToc } from "@/components/study-toc";
 import { Words } from "@/components/words";
+import { NewTab } from "@/components/new-tab";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -140,7 +141,9 @@ export default async function CaseStudy({ params }: Params) {
             ← Selected work
           </Link>
           <p className="label">
-            {project.kind} · {project.year} · {minutes} min read
+            Study {String(position + 1).padStart(2, "0")} of{" "}
+            {String(studies.length).padStart(2, "0")} · {project.kind} ·{" "}
+            {project.year} · {minutes} min read
           </p>
         </div>
 
@@ -153,6 +156,14 @@ export default async function CaseStudy({ params }: Params) {
             {project.summary}
           </p>
 
+          {/* The honest result, stated before the prose rather than left for
+              the reader to infer from it. It was already written for the work
+              index and had no home on the page the index links to. */}
+          <div className="mt-8 grid gap-1.5 border-y border-rule py-4 md:grid-cols-[7rem_1fr] md:gap-6">
+            <p className="label label-accent">Outcome</p>
+            <p className="pretty measure t-body text-ink">{project.outcome}</p>
+          </div>
+
           <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
             {project.repo ? (
               <a
@@ -161,7 +172,8 @@ export default async function CaseStudy({ params }: Params) {
                 rel="noreferrer noopener"
                 className="btn btn-line"
               >
-                View repo ↗
+                View repo
+                <NewTab />
               </a>
             ) : null}
             {project.href ? (
@@ -171,7 +183,8 @@ export default async function CaseStudy({ params }: Params) {
                 rel="noreferrer noopener"
                 className="btn btn-line"
               >
-                Visit ↗
+                Visit
+                <NewTab />
               </a>
             ) : null}
           </div>
@@ -274,7 +287,11 @@ export default async function CaseStudy({ params }: Params) {
             className="lg:col-span-4 lg:border-l lg:border-rule lg:pl-10"
           >
             <div className="lg:sticky lg:top-20">
-              <nav aria-label="On this page" className="mb-8 hidden lg:block">
+              <nav
+                aria-label="On this page"
+                data-print="hide"
+                className="mb-8 hidden lg:block"
+              >
                 <p className="label mb-3">On this page</p>
                 <StudyToc items={toc} />
               </nav>
@@ -309,6 +326,7 @@ export default async function CaseStudy({ params }: Params) {
         <Reveal delay={60}>
           <nav
             aria-label="More case studies"
+            data-print="hide"
             className="mt-24 grid border-t border-rule-strong sm:grid-cols-2"
           >
             {showPrevious ? (
@@ -335,6 +353,15 @@ export default async function CaseStudy({ params }: Params) {
               </span>
             </Link>
           </nav>
+
+          {/* The prev/next pair cycles, so without this the only way back to
+              the index from the foot of a study is the browser button or a
+              scroll to the top. */}
+          <p className="mt-8" data-print="hide">
+            <Link href="/work" className="label link-quiet">
+              ← All case studies
+            </Link>
+          </p>
         </Reveal>
       </div>
     </article>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { site } from "@/data/site";
 import { Reveal } from "@/components/reveal";
 import { Words } from "@/components/words";
+import { NewTab } from "@/components/new-tab";
 
 /* The old glass "Available for…" chip, typeset as a running head instead. */
 const panel = [
@@ -59,7 +60,8 @@ export function Hero() {
                   rel="noreferrer noopener"
                   className="link t-sm"
                 >
-                  GitHub ↗
+                  GitHub
+                  <NewTab />
                 </a>
               </div>
             </Reveal>

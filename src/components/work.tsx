@@ -5,6 +5,7 @@ import { Section } from "@/components/section";
 import { Reveal } from "@/components/reveal";
 import { WorkEntry } from "@/components/work-entry";
 import { OssList } from "@/components/oss-list";
+import { NewTab } from "@/components/new-tab";
 
 export function Work() {
   return (
@@ -47,7 +48,8 @@ export function Work() {
                 rel="noreferrer noopener"
                 className="link-quiet underline underline-offset-[0.22em]"
               >
-                All repos ↗
+                All repos
+                <NewTab />
               </a>
             </p>
           </div>
