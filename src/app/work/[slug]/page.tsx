@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { projects, studies } from "@/data/projects";
+import { projects, studies, type Project } from "@/data/projects";
 import { site } from "@/data/site";
 import { Reveal } from "@/components/reveal";
-import { ArrowUpRight } from "@/components/icons";
+import { StudyToc } from "@/components/study-toc";
+import { Words } from "@/components/words";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -17,6 +18,23 @@ const anchor = (heading: string) =>
     .replace(/['’]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+
+/**
+ * Reading time from the study's own text. 220 wpm is the usual estimate for
+ * screen reading; the floor of one minute keeps the short studies from
+ * advertising "0 min".
+ */
+function readingTime(study: NonNullable<Project["study"]>) {
+  const text = [
+    study.intro,
+    study.pullQuote,
+    ...study.sections.flatMap((section) => [section.heading, ...section.body]),
+    ...(study.decisions ?? []).flatMap((d) => [d.choice, d.over, d.why]),
+  ].join(" ");
+
+  const words = text.split(/\s+/).filter(Boolean).length;
+  return { words, minutes: Math.max(1, Math.round(words / 220)) };
+}
 
 export function generateStaticParams() {
   return studies.map((project) => ({ slug: project.slug }));
@@ -56,10 +74,20 @@ export default async function CaseStudy({ params }: Params) {
   if (!project?.study) notFound();
 
   const study = project.study;
+  const toc = study.sections.map((section) => ({
+    id: anchor(section.heading),
+    heading: section.heading,
+  }));
+  const { words, minutes } = readingTime(study);
+
   /* Cycle through the studies in order rather than always landing on the
      first sibling — otherwise two case studies point at each other forever. */
   const position = studies.findIndex((p) => p.slug === project.slug);
   const next = studies[(position + 1) % studies.length];
+  const previous = studies[(position - 1 + studies.length) % studies.length];
+  // With fewer than three studies the cycle doubles back on itself, and
+  // "previous" would be the same link as "next".
+  const showPrevious = previous.slug !== next.slug && previous.slug !== slug;
 
   const schema = {
     "@context": "https://schema.org",
@@ -72,8 +100,12 @@ export default async function CaseStudy({ params }: Params) {
         publisher: { "@type": "Person", name: site.name },
         url: `${site.url}/work/${project.slug}`,
         mainEntityOfPage: `${site.url}/work/${project.slug}`,
+        image: `${site.url}/work/${project.slug}/opengraph-image`,
         about: project.stack,
         articleSection: study.sections.map((s) => s.heading),
+        wordCount: words,
+        timeRequired: `PT${minutes}M`,
+        inLanguage: "en",
       },
       {
         "@type": "BreadcrumbList",
@@ -83,7 +115,7 @@ export default async function CaseStudy({ params }: Params) {
             "@type": "ListItem",
             position: 2,
             name: "Selected work",
-            item: `${site.url}/#work`,
+            item: `${site.url}/work`,
           },
           {
             "@type": "ListItem",
@@ -103,27 +135,21 @@ export default async function CaseStudy({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <div className="shell">
-        <Reveal>
-          <Link
-            href="/#work"
-            className="link-draw font-mono text-[0.72rem] uppercase tracking-[0.16em] text-faint"
-          >
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-rule-strong pb-3">
+          <Link href="/work" className="label link-quiet">
             ← Selected work
           </Link>
+          <p className="label">
+            {project.kind} · {project.year} · {minutes} min read
+          </p>
+        </div>
 
-          <div className="mt-10 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.68rem] uppercase tracking-[0.16em] text-faint">
-            <span className="text-accent/80">{project.kind}</span>
-            <span aria-hidden="true">/</span>
-            <span>{project.year}</span>
-            <span aria-hidden="true">/</span>
-            <span>{project.role}</span>
-          </div>
+        <h1 className="balance t-title mt-10 max-w-[16ch]">
+          <Words text={project.title} stagger={0.9} />
+        </h1>
 
-          <h1 className="mercury balance mt-5 text-[clamp(2.4rem,6vw,4rem)] font-medium leading-[1.02] tracking-[-0.04em]">
-            {project.title}
-          </h1>
-
-          <p className="pretty measure mt-6 text-[1.05rem] leading-relaxed text-muted">
+        <Reveal delay={80}>
+          <p className="pretty measure t-lede mt-6 text-muted">
             {project.summary}
           </p>
 
@@ -133,10 +159,9 @@ export default async function CaseStudy({ params }: Params) {
                 href={project.repo}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="btn btn-ghost"
+                className="btn btn-line"
               >
-                View repo
-                <ArrowUpRight className="h-3.5 w-3.5 opacity-60" />
+                View repo ↗
               </a>
             ) : null}
             {project.href ? (
@@ -144,129 +169,173 @@ export default async function CaseStudy({ params }: Params) {
                 href={project.href}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="btn btn-ghost"
+                className="btn btn-line"
               >
-                Visit
-                <ArrowUpRight className="h-3.5 w-3.5 opacity-60" />
+                Visit ↗
               </a>
             ) : null}
           </div>
         </Reveal>
 
         <div className="mt-16 grid gap-12 lg:grid-cols-12 lg:gap-14">
-          <Reveal delay={80} className="lg:col-span-8">
-            <p className="pretty serif measure text-[1.35rem] leading-[1.6] text-text/90 md:text-[1.5rem]">
+          <Reveal delay={100} className="lg:col-span-8">
+            <p className="pretty display measure text-[1.3rem] leading-[1.5] text-ink md:text-[1.45rem]">
               {study.intro}
             </p>
 
+            <p className="pull measure mt-10">“{study.pullQuote}”</p>
+
+            {/* Collapsed on small screens: the sticky rail that carries this
+                on desktop is hidden there, and an always-open list would push
+                the first paragraph a full screen down on a phone. */}
+            <details className="mt-10 border-y border-rule py-4 lg:hidden">
+              <summary className="label cursor-pointer list-none">
+                On this page ({toc.length})
+              </summary>
+              <div className="mt-4">
+                <StudyToc items={toc} />
+              </div>
+            </details>
+
             <div className="mt-14 space-y-14">
-              {study.sections.map((section, i) => (
-                <section
-                  key={section.heading}
-                  id={anchor(section.heading)}
-                  className="scroll-mt-28"
-                >
-                  <div className="flex items-baseline gap-3">
-                    <span className="kicker tabular-nums text-accent/70">
+              {study.sections.map((section, i) => {
+                const id = anchor(section.heading);
+                return (
+                  <section key={section.heading} id={id} className="scroll-mt-24">
+                    <p className="label label-accent">
                       {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <h2 className="text-[1.35rem] font-medium tracking-[-0.025em] text-text">
+                    </p>
+                    <h2 className="t-h3 mt-2 text-ink">
                       {section.heading}
-                    </h2>
-                  </div>
-                  <span className="hairline mt-4 block" />
-                  <div className="mt-5 space-y-4">
-                    {section.body.map((paragraph) => (
-                      <p
-                        key={paragraph.slice(0, 40)}
-                        className="pretty measure text-[0.98rem] leading-[1.75] text-muted"
+                      <a
+                        href={`#${id}`}
+                        className="anchor font-mono text-[0.6em]"
+                        aria-label={`Link to “${section.heading}”`}
                       >
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </section>
-              ))}
+                        #
+                      </a>
+                    </h2>
+                    <span className="hairline mt-4 block" />
+                    <div className="mt-5 space-y-4">
+                      {section.body.map((paragraph) => (
+                        <p
+                          key={paragraph.slice(0, 40)}
+                          className="pretty measure t-body text-muted"
+                        >
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
             </div>
+
+            {study.decisions?.length ? (
+              <section id="decisions" className="mt-16 scroll-mt-24">
+                <p className="label label-accent">
+                  {String(study.sections.length + 1).padStart(2, "0")}
+                </p>
+                <h2 className="t-h3 mt-2 text-ink">
+                  Calls I made
+                  <a
+                    href="#decisions"
+                    className="anchor font-mono text-[0.6em]"
+                    aria-label="Link to “Calls I made”"
+                  >
+                    #
+                  </a>
+                </h2>
+                <span className="hairline mt-4 block" />
+
+                {/* Chosen / instead of / why, as three typeset parts. The
+                    trade-off is the content — it should not be hidden inside a
+                    sentence a skimming reader will skip. */}
+                <dl className="mt-6 border-t border-rule">
+                  {study.decisions.map((decision) => (
+                    <div key={decision.choice} className="border-b border-rule py-5">
+                      <dt className="t-body text-ink">
+                        {decision.choice}
+                        <span className="label label-accent mx-2">over</span>
+                        <span className="text-faint">{decision.over}</span>
+                      </dt>
+                      <dd className="pretty measure t-sm mt-2 text-muted">
+                        {decision.why}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            ) : null}
           </Reveal>
 
-          <Reveal delay={140} className="lg:col-span-4">
-            <div className="lg:sticky lg:top-24">
-              <nav aria-label="On this page" className="mb-6 hidden lg:block">
-                <p className="kicker">On this page</p>
-                <ol className="mt-3 space-y-2 border-l border-line pl-4">
-                  {study.sections.map((section, i) => (
-                    <li key={section.heading}>
-                      <a
-                        href={`#${anchor(section.heading)}`}
-                        className="link-draw inline-flex gap-2 text-[0.82rem] text-muted"
-                      >
-                        <span className="font-mono text-[0.68rem] tabular-nums text-faint">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        {section.heading}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
+          <Reveal
+            delay={140}
+            className="lg:col-span-4 lg:border-l lg:border-rule lg:pl-10"
+          >
+            <div className="lg:sticky lg:top-20">
+              <nav aria-label="On this page" className="mb-8 hidden lg:block">
+                <p className="label mb-3">On this page</p>
+                <StudyToc items={toc} />
               </nav>
 
-              <dl className="glass divide-y divide-line">
+              <p className="label mb-3">Particulars</p>
+              <dl className="dossier">
                 {study.facts.map((fact) => (
-                  <div key={fact.label} className="px-5 py-4">
-                    <dt className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-faint">
-                      {fact.label}
-                    </dt>
-                    <dd className="mt-1 text-[0.88rem] text-muted">
-                      {fact.value}
-                    </dd>
+                  <div key={fact.label}>
+                    <dt className="label">{fact.label}</dt>
+                    <dd className="t-sm leading-snug text-ink">{fact.value}</dd>
                   </div>
                 ))}
+                <div>
+                  <dt className="label">Stack</dt>
+                  <dd className="t-sm leading-snug text-ink">
+                    {project.stack.join(" · ")}
+                  </dd>
+                </div>
               </dl>
 
-              <div className="mt-6">
-                <p className="kicker">Stack</p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {project.stack.map((item) => (
-                    <span key={item} className="tag">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="glass mt-6 p-5">
-                <p className="text-[0.88rem] leading-relaxed text-muted">
-                  Want the longer version, or the parts that don&apos;t fit on a
-                  page?
-                </p>
-                <a
-                  href={`mailto:${site.email}`}
-                  className="link-draw mt-3 inline-block text-[0.85rem]"
-                >
+              <p className="pretty t-sm mt-8 text-faint">
+                Want the longer version, or the parts that don&apos;t fit on a
+                page?{" "}
+                <a href={`mailto:${site.email}`} className="link">
                   {site.email}
                 </a>
-              </div>
+              </p>
             </div>
           </Reveal>
         </div>
 
-        {next ? (
-          <Reveal delay={60}>
-            <div className="mt-24 border-t border-line pt-8">
-              <p className="kicker">Next</p>
+        <Reveal delay={60}>
+          <nav
+            aria-label="More case studies"
+            className="mt-24 grid border-t border-rule-strong sm:grid-cols-2"
+          >
+            {showPrevious ? (
               <Link
-                href={`/work/${next.slug}`}
-                className="group mt-3 flex items-baseline justify-between gap-6"
+                href={`/work/${previous.slug}`}
+                className="group border-b border-rule py-7 sm:border-r sm:pr-8"
               >
-                <span className="text-2xl font-medium tracking-[-0.025em] text-text transition-colors group-hover:text-white md:text-3xl">
-                  {next.title}
+                <span className="label">← Previous</span>
+                <span className="t-h3 mt-2 block text-ink transition-colors group-hover:text-accent">
+                  {previous.title}
                 </span>
-                <ArrowUpRight className="h-5 w-5 shrink-0 text-faint transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </Link>
-            </div>
-          </Reveal>
-        ) : null}
+            ) : null}
+
+            <Link
+              href={`/work/${next.slug}`}
+              className={`group border-b border-rule py-7 ${
+                showPrevious ? "sm:pl-8 sm:text-right" : ""
+              }`}
+            >
+              <span className="label">Next →</span>
+              <span className="t-h3 mt-2 block text-ink transition-colors group-hover:text-accent">
+                {next.title}
+              </span>
+            </Link>
+          </nav>
+        </Reveal>
       </div>
     </article>
   );

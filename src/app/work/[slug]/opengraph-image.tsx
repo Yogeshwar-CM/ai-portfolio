@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { projects, studies } from "@/data/projects";
 import { site } from "@/data/site";
+import { frauncesTTF, og } from "@/app/og-font";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -11,8 +12,9 @@ export function generateStaticParams() {
 }
 
 /**
- * Per-study share card. Rendered at build time by Satori — flex only, and
- * every element with more than one child needs an explicit display.
+ * Per-study share card, same stock as the site. Rendered at build time by
+ * Satori — flex only, and every element with more than one child needs an
+ * explicit display.
  */
 export default async function CaseStudyImage({
   params,
@@ -28,6 +30,7 @@ export default async function CaseStudyImage({
     ? [project.kind, project.year, project.role].join("  ·  ")
     : site.role;
   const stack = project?.stack.slice(0, 5) ?? [];
+  const fonts = await frauncesTTF(title);
 
   return new ImageResponse(
     (
@@ -38,41 +41,25 @@ export default async function CaseStudyImage({
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "68px 80px",
-          backgroundColor: "#060708",
-          backgroundImage:
-            "radial-gradient(900px 420px at 12% -12%, rgba(110,231,249,0.16), transparent 65%), radial-gradient(700px 380px at 98% 112%, rgba(180,205,220,0.10), transparent 60%)",
-          color: "#f1f3f5",
+          padding: "60px 76px",
+          backgroundColor: og.paper,
+          color: og.ink,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 44,
-              height: 44,
-              borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.16)",
-              backgroundColor: "rgba(255,255,255,0.05)",
-              fontSize: 18,
-              letterSpacing: -1,
-            }}
-          >
-            YC
-          </div>
-          <div
-            style={{
-              display: "flex",
-              fontSize: 19,
-              letterSpacing: 4,
-              textTransform: "uppercase",
-              color: "#6ee7f9",
-            }}
-          >
-            Case study
-          </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            borderBottom: `2px solid ${og.ruleStrong}`,
+            paddingBottom: 18,
+            fontSize: 20,
+            letterSpacing: 3,
+            textTransform: "uppercase",
+          }}
+        >
+          <div style={{ display: "flex", color: og.accent }}>Case study</div>
+          <div style={{ display: "flex", color: og.faint }}>{site.name}</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -82,7 +69,7 @@ export default async function CaseStudyImage({
               fontSize: 20,
               letterSpacing: 2,
               textTransform: "uppercase",
-              color: "#7d848c",
+              color: og.faint,
             }}
           >
             {meta}
@@ -90,11 +77,12 @@ export default async function CaseStudyImage({
           <div
             style={{
               display: "flex",
-              marginTop: 22,
-              fontSize: title.length > 26 ? 74 : 92,
+              fontFamily: "Fraunces",
+              marginTop: 20,
+              fontSize: title.length > 26 ? 78 : 98,
               letterSpacing: -3,
-              lineHeight: 1.04,
-              color: "#ffffff",
+              lineHeight: 1.02,
+              color: og.ink,
             }}
           >
             {title}
@@ -104,8 +92,8 @@ export default async function CaseStudyImage({
               display: "flex",
               marginTop: 24,
               fontSize: 28,
-              lineHeight: 1.35,
-              color: "#9aa1a9",
+              lineHeight: 1.4,
+              color: og.muted,
               maxWidth: 960,
             }}
           >
@@ -116,36 +104,19 @@ export default async function CaseStudyImage({
         <div
           style={{
             display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
-            borderTop: "1px solid rgba(255,255,255,0.12)",
-            paddingTop: 26,
+            borderTop: `1px solid ${og.rule}`,
+            paddingTop: 22,
             fontSize: 21,
-            color: "#6a7078",
+            letterSpacing: 1,
+            color: og.faint,
           }}
         >
-          <div style={{ display: "flex", gap: 12 }}>
-            {stack.map((item) => (
-              <div
-                key={item}
-                style={{
-                  display: "flex",
-                  padding: "6px 14px",
-                  borderRadius: 8,
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  backgroundColor: "rgba(255,255,255,0.03)",
-                  fontSize: 19,
-                  color: "#9aa1a9",
-                }}
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-          <div style={{ display: "flex" }}>{site.name}</div>
+          <div style={{ display: "flex" }}>{stack.join("  ·  ")}</div>
+          <div style={{ display: "flex" }}>{site.url.replace(/^https?:\/\//, "")}</div>
         </div>
       </div>
     ),
-    size,
+    { ...size, fonts },
   );
 }

@@ -15,7 +15,15 @@ export type Project = {
   /** Long-form case study; omitted projects render as cards only. */
   study?: {
     intro: string;
+    /** The sharpest line in the study, lifted verbatim for skimmers. */
+    pullQuote: string;
     sections: { heading: string; body: string[] }[];
+    /**
+     * The trade-offs, stated as trade-offs. An engineering reader skips the
+     * prose and reads this — it is the part that shows judgement rather than
+     * activity.
+     */
+    decisions?: { choice: string; over: string; why: string }[];
     facts: { label: string; value: string }[];
   };
 };
@@ -37,6 +45,8 @@ export const projects: Project[] = [
     study: {
       intro:
         "Hiring tooling is usually a pile of disconnected products: one for the job post, one for the applicant tracking, one for the screening call, one for notes. JobHouse is an attempt to collapse that into a single loop where the AI does the repetitive screening pass and a human reads the result.",
+      pullQuote:
+        "A speech provider timing out should not look the same to the user as a model refusing to answer.",
       sections: [
         {
           heading: "The loop",
@@ -67,6 +77,23 @@ export const projects: Project[] = [
           ],
         },
       ],
+      decisions: [
+        {
+          choice: "Groq for inference",
+          over: "a higher-ceiling model behind more latency",
+          why: "In a spoken interview the pause is the product. Two seconds of silence turns a conversation into an interrogation, and no answer quality makes up for that.",
+        },
+        {
+          choice: "A spoken interview",
+          over: "a written screening form",
+          why: "A form measures how well someone writes under no pressure. The point of the screen is to hear how they answer when they cannot edit.",
+        },
+        {
+          choice: "Supabase for auth and persistence",
+          over: "hand-rolled sessions and storage",
+          why: "The risky part of this product is the interview loop. Spending the risk budget on the CRUD around it would have been a bad trade.",
+        },
+      ],
       facts: [
         { label: "Type", value: "Full-stack AI product" },
         { label: "Role", value: "Full-stack integration" },
@@ -93,6 +120,8 @@ export const projects: Project[] = [
     study: {
       intro:
         "I joined Pickyourtrail as an AI Engineer after interning, and work on agentic systems that run in production. I keep the details of internal systems internal, so this page is about how I think about the work rather than what is behind the login.",
+      pullQuote:
+        "The failure mode that matters is not the model saying something wrong. It is the model doing something wrong, confidently, at three in the morning.",
       sections: [
         {
           heading: "What production changes",
@@ -114,6 +143,23 @@ export const projects: Project[] = [
           body: [
             "Two months full-time, about a year interning before that. I am early, and I would rather say that plainly than dress it up. What I bring is that I have shipped agent code that other people depend on, and I have been on the receiving end of my own bugs.",
           ],
+        },
+      ],
+      decisions: [
+        {
+          choice: "Four well-specified tools",
+          over: "twenty flexible ones",
+          why: "A narrow tool surface is easier for the model to choose correctly from and far easier for a human to reason about when a run goes sideways.",
+        },
+        {
+          choice: "Traces you can read",
+          over: "traces you can only grep",
+          why: "If you cannot reconstruct why a run went the way it did, you are not debugging — you are guessing with extra steps.",
+        },
+        {
+          choice: "Prompts versioned and reviewed like code",
+          over: "prompts edited in place",
+          why: "They are behaviour. Anything that changes behaviour without review is an outage waiting for a quiet afternoon.",
         },
       ],
       facts: [
@@ -139,6 +185,8 @@ export const projects: Project[] = [
     study: {
       intro:
         "A grand prize (₹51,000) for an AI agent build. Hackathons are not production, and I do not pretend otherwise — but they are an unusually honest test of whether you can scope something and finish it.",
+      pullQuote:
+        "Every team that lost had a better idea than they had a demo.",
       sections: [
         {
           heading: "What it taught me",
@@ -146,6 +194,13 @@ export const projects: Project[] = [
             "Scope is the whole skill. Every team that lost had a better idea than they had a demo. The constraint forces you to pick the one path through the product that has to work and defend it against your own feature ideas.",
             "Agents demo well and break quietly. The version that wins on stage and the version that survives a week of real users are different pieces of software, and knowing that gap exists is most of what I took away from it.",
           ],
+        },
+      ],
+      decisions: [
+        {
+          choice: "One path through the product, defended",
+          over: "the larger idea we actually had",
+          why: "A deadline does not negotiate. The only version that counts is the one that runs on stage, so every feature after the first complete path was a liability.",
         },
       ],
       facts: [
@@ -170,6 +225,8 @@ export const projects: Project[] = [
     study: {
       intro:
         "My first internship where the software took money. Mastervance is a course platform — you sign up, you buy a course, you learn, and at the end you get a certificate someone else can verify. I built that path front to back over three months.",
+      pullQuote:
+        "A payment provider tells the browser it succeeded. The browser is a bystander — the server confirms, and the client just displays the outcome.",
       sections: [
         {
           heading: "The path that had to work",
@@ -199,6 +256,23 @@ export const projects: Project[] = [
             "Model the enrolment as a state machine on day one instead of as a boolean that gets flipped. Half the edge cases I hit — paid-but-not-enrolled, enrolled-but-no-certificate — were states that already existed in reality and just had no name in my schema.",
             "Log the payment lifecycle properly from the start. When something did go wrong, my ability to explain it depended entirely on whether I happened to have logged that step.",
           ],
+        },
+      ],
+      decisions: [
+        {
+          choice: "Server-confirmed payments",
+          over: "unlocking the course on the client callback",
+          why: "The browser is the one participant in a payment that an attacker fully controls, and the one most likely to be closed mid-flow.",
+        },
+        {
+          choice: "Firebase Auth",
+          over: "hand-rolled session handling",
+          why: "Three-month timeline, and the risky part of the product was the payment-to-certificate chain. Identity was the wrong place to spend the time.",
+        },
+        {
+          choice: "The record as the verifiable artefact",
+          over: "the certificate PDF itself",
+          why: "A certificate whose only proof is the file it is printed on proves nothing. Verification has to resolve to something the holder cannot edit.",
         },
       ],
       facts: [

@@ -1,8 +1,13 @@
+import { Fragment } from "react";
 import { skills } from "@/data/skills";
 import { Section } from "@/components/section";
 import { Reveal } from "@/components/reveal";
-import { Spotlight } from "@/components/spotlight";
 
+/**
+ * A taxonomy, not a tile grid. Each group is one definition-list row: term on
+ * the left margin, the terms of art set as a dense run on the right. Reading
+ * it takes about as long as scanning icon cards and says considerably more.
+ */
 export function Skills() {
   return (
     <Section
@@ -12,34 +17,34 @@ export function Skills() {
       title="Agentic first, full-stack because someone has to ship it."
       lede="Listed in the order I actually use them. If something is on here, I have used it on something real — not read the docs once."
     >
-      <div className="grid gap-4 md:grid-cols-3">
+      <dl className="border-t border-rule">
         {skills.map((group, i) => (
-          <Reveal key={group.title} delay={i * 80}>
-            <Spotlight className="glass h-full p-6">
-              <div className="flex items-baseline justify-between gap-3">
-                <h3 className="text-[1.02rem] font-medium tracking-[-0.02em] text-text">
-                  {group.title}
-                </h3>
-                <span className="font-mono text-[0.62rem] text-faint">
-                  {String(i + 1).padStart(2, "0")}
+          <Reveal key={group.title} delay={i * 70}>
+            <div className="grid gap-3 border-b border-rule py-8 lg:grid-cols-12 lg:gap-14">
+              <dt className="lg:col-span-3">
+                <span className="t-h3 block text-ink">{group.title}</span>
+                <span className="t-sm mt-1.5 block text-faint">
+                  {group.note}
                 </span>
-              </div>
+              </dt>
 
-              <p className="mt-2 text-[0.82rem] leading-relaxed text-faint">
-                {group.note}
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-1.5">
-                {group.items.map((item) => (
-                  <span key={item} className="tag">
+              <dd className="pretty t-lede text-ink lg:col-span-9">
+                {group.items.map((item, j) => (
+                  <Fragment key={item}>
                     {item}
-                  </span>
+                    {j < group.items.length - 1 ? (
+                      <span aria-hidden="true" className="text-accent">
+                        {" "}
+                        ·{" "}
+                      </span>
+                    ) : null}
+                  </Fragment>
                 ))}
-              </div>
-            </Spotlight>
+              </dd>
+            </div>
           </Reveal>
         ))}
-      </div>
+      </dl>
     </Section>
   );
 }

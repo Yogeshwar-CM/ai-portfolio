@@ -8,25 +8,29 @@ Ship state for **ai-portfolio** — Yogeshwar CM.
 
 ## Shipped
 
-**Design system** — ink/mercury tokens, one accent (`--accent: #6ee7f9`), glass
-surfaces with a top inner highlight, hairline rails framing the content column.
-Faint metadata text sits at ~5.2:1 (AA).
+**Design system** — editorial dossier: paper/ink tokens, one rust accent
+(`--accent: #9c3b16`), Fraunces + IBM Plex Sans/Mono, rules instead of cards.
+Dark is the same design on darker stock via `prefers-color-scheme`. Faint
+metadata sits at 5.3:1 light / 5.4:1 dark (AA). Rationale in `DESIGN_NOTES.md`.
 
-**Site** — hero, selected work (4 cards + OSS row), experience timeline, skills,
-about, contact, footer. Long-form case study at `/work/[slug]` for each of
-JobHouse, Pickyourtrail, the hackathon grand prize, and Mastervance.
+**Site** — hero with a standing-details table, selected work as a numbered index
+with folding detail, experience, skills as a definition list, about, contact,
+colophon footer. Long-form case study at `/work/[slug]` for each of JobHouse,
+Pickyourtrail, the hackathon grand prize, and Mastervance.
 
-**Case studies** — numbered anchored sections, sticky "On this page" nav, facts
-rail, cyclic next-study link, `Article` + `BreadcrumbList` JSON-LD.
+**Case studies** — numbered anchored sections, sticky "On this page" nav,
+particulars rail, `Calls I made` decision list, cyclic next-study link,
+`Article` + `BreadcrumbList` JSON-LD.
 
 **SEO / share** — `Person` schema on home, per-study OG cards rendered at build
-time, per-study canonical + twitter metadata, sitemap, robots.
+time on the paper stock with Fraunces fetched as TTF, per-study canonical +
+twitter metadata, sitemap, robots.
 
-**Motion / a11y** — IntersectionObserver reveals with a blur-settle, 2px card
-lift, scroll progress + active section in the nav, skip link, visible focus
-rings, `prefers-reduced-motion` honoured (including the hover transform, not
-just its duration), and a `scripting: none` + `noscript` fallback so the page
-is not blank without JS.
+**Motion / a11y** — IntersectionObserver reveals (opacity and translate only),
+scroll progress + active section in the nav, skip link, visible focus rings,
+`prefers-reduced-motion` honoured (the work-index folds stay open rather than
+snapping), and a `scripting: none` + `noscript` fallback so the page is not
+blank without JS.
 
 ---
 
@@ -54,9 +58,9 @@ reference in `src/`). Recruiters ask for one within the first message, and
 right now the only answer is "email me and I'll send it" — a round trip that
 loses people who were skimming ten tabs.
 
-**Do:** `public/yogeshwar-cm-cv.pdf`, a "Download CV" ghost button next to
-*View work* in the hero and in the contact block, and `hasOccupation` on the
-`Person` schema.
+**Do:** `public/yogeshwar-cm-cv.pdf`, a "Download CV" `.btn-line` next to
+*Selected work* in the hero and a row in the contact block, and `hasOccupation`
+on the `Person` schema.
 **Effort:** an hour once the PDF exists. **Return:** removes a step from the
 one funnel this site exists to serve.
 

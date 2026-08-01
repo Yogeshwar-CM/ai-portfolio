@@ -1,27 +1,37 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { site } from "@/data/site";
 import { Background } from "@/components/background";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 
-const sans = Geist({
+/* Three faces, one job each. Plex Sans sets the prose — a grotesque drawn for
+   technical documentation, which is what this is. Plex Mono carries every
+   label, figure and index, so metadata never competes with reading text.
+   Fraunces is the only voice: name, headings, pull quotes. */
+const sans = IBM_Plex_Sans({
   variable: "--font-sans-var",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
-const mono = Geist_Mono({
+const mono = IBM_Plex_Mono({
   variable: "--font-mono-var",
   subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
-const display = Instrument_Serif({
+/* WONK gives the italic its swashed g and y; SOFT stays low so the terminals
+   keep their edge. Both are pinned in CSS — declared here only so next/font
+   downloads the axes instead of flattening them to defaults. */
+const display = Fraunces({
   variable: "--font-display-var",
   subsets: ["latin"],
-  weight: "400",
+  axes: ["SOFT", "WONK", "opsz"],
   style: ["normal", "italic"],
   display: "swap",
 });
@@ -70,8 +80,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#060708",
-  colorScheme: "dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f1ea" },
+    { media: "(prefers-color-scheme: dark)", color: "#14120f" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({
@@ -82,17 +95,17 @@ export default function RootLayout({
       lang="en"
       className={`${sans.variable} ${mono.variable} ${display.variable} h-full antialiased`}
     >
-      <body className="rails flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-black"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-paper"
         >
           Skip to content
         </a>
         {/* Belt-and-braces for the `scripting: none` rule in globals.css,
             which older Safari and Firefox don't support. */}
         <noscript>
-          <style>{`[data-reveal]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
         </noscript>
         <Background />
         <Nav />

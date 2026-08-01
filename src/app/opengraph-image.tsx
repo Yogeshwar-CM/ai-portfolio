@@ -1,14 +1,21 @@
 import { ImageResponse } from "next/og";
+import { frauncesTTF, og } from "./og-font";
 
 export const alt = "Yogeshwar CM — AI Engineer, production agentic systems";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+const name = "Yogeshwar CM";
+
 /**
- * Rendered at build time by Satori — keep to the CSS subset it supports
- * (no backdrop-filter, no background-clip: text).
+ * Rendered at build time by Satori — keep to the CSS subset it supports (flex
+ * only, no CSS variables, and an explicit `display` on anything with more than
+ * one child). Paper stock, so the card reads as a printed cover in a timeline
+ * that is mostly dark cards.
  */
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const fonts = await frauncesTTF(name);
+
   return new ImageResponse(
     (
       <div
@@ -18,83 +25,72 @@ export default function OpengraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "72px 80px",
-          backgroundColor: "#060708",
-          backgroundImage:
-            "radial-gradient(900px 420px at 15% -10%, rgba(110,231,249,0.16), transparent 65%), radial-gradient(700px 380px at 95% 110%, rgba(180,205,220,0.10), transparent 60%)",
-          color: "#f1f3f5",
+          padding: "64px 76px",
+          backgroundColor: og.paper,
+          color: og.ink,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 44,
-              height: 44,
-              borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.16)",
-              backgroundColor: "rgba(255,255,255,0.05)",
-              fontSize: 18,
-              letterSpacing: -1,
-            }}
-          >
-            YC
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            borderBottom: `2px solid ${og.ruleStrong}`,
+            paddingBottom: 20,
+            fontSize: 21,
+            letterSpacing: 3,
+            textTransform: "uppercase",
+          }}
+        >
+          <div style={{ display: "flex", color: og.accent }}>
+            Available for AI engineering roles
           </div>
-          <div
-            style={{
-              fontSize: 20,
-              letterSpacing: 4,
-              textTransform: "uppercase",
-              color: "#6ee7f9",
-            }}
-          >
-            AI Engineer
-          </div>
+          <div style={{ display: "flex", color: og.faint }}>Chennai, IN</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div
             style={{
-              fontSize: 104,
+              display: "flex",
+              fontFamily: "Fraunces",
+              fontSize: 132,
               letterSpacing: -4,
               lineHeight: 1,
-              color: "#ffffff",
+              color: og.ink,
             }}
           >
-            Yogeshwar CM
+            {name}
           </div>
           <div
             style={{
-              marginTop: 28,
-              fontSize: 34,
-              lineHeight: 1.3,
-              color: "#9aa1a9",
-              maxWidth: 900,
+              display: "flex",
+              marginTop: 26,
+              fontSize: 32,
+              lineHeight: 1.35,
+              color: og.muted,
+              maxWidth: 880,
             }}
           >
-            Production agentic systems at Pickyourtrail. B.Tech CSE (AI &amp;
-            ML), HITS Chennai.
+            AI Engineer at Pickyourtrail — production agentic systems. B.Tech
+            CSE (AI &amp; ML), HITS Chennai.
           </div>
         </div>
 
         <div
           style={{
             display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
-            borderTop: "1px solid rgba(255,255,255,0.12)",
-            paddingTop: 28,
+            borderTop: `1px solid ${og.rule}`,
+            paddingTop: 22,
             fontSize: 22,
-            color: "#6a7078",
+            color: og.faint,
           }}
         >
           <div style={{ display: "flex" }}>github.com/Yogeshwar-CM</div>
-          <div style={{ display: "flex" }}>Chennai, India</div>
+          <div style={{ display: "flex" }}>Selected work · Case studies</div>
         </div>
       </div>
     ),
-    size,
+    { ...size, fonts },
   );
 }

@@ -1,118 +1,62 @@
 import { site } from "@/data/site";
+import { Section } from "@/components/section";
 import { Reveal } from "@/components/reveal";
-import { Spotlight } from "@/components/spotlight";
-import {
-  ArrowUpRight,
-  Devfolio,
-  GitHub,
-  LinkedIn,
-  Mail,
-  XLogo,
-} from "@/components/icons";
 
 const channels = [
-  {
-    label: "GitHub",
-    handle: "Yogeshwar-CM",
-    href: site.links.github,
-    Icon: GitHub,
-  },
-  {
-    label: "LinkedIn",
-    handle: "yogeshwar-cm",
-    href: site.links.linkedin,
-    Icon: LinkedIn,
-  },
-  { label: "X", handle: site.xHandle, href: site.links.x, Icon: XLogo },
-  {
-    label: "Devfolio",
-    handle: "Yogeshwar_CM",
-    href: site.links.devfolio,
-    Icon: Devfolio,
-  },
+  { label: "GitHub", handle: "Yogeshwar-CM", href: site.links.github },
+  { label: "LinkedIn", handle: "yogeshwar-cm", href: site.links.linkedin },
+  { label: "X", handle: site.xHandle, href: site.links.x },
+  { label: "Devfolio", handle: "Yogeshwar_CM", href: site.links.devfolio },
 ];
 
 export function Contact() {
   return (
-    <section
+    <Section
       id="contact"
-      aria-labelledby="contact-title"
-      className="relative z-10 scroll-mt-24 border-t border-line/70 py-20 md:py-28"
+      index="05"
+      label="Contact"
+      title="Hiring, or just want to argue about agents?"
+      lede="Email is the fastest way to reach me. I reply to anything that isn’t a template."
     >
-      <div className="halo" aria-hidden="true" />
-      <div className="shell">
-        <Reveal>
-          <div className="flex items-center gap-4">
-            <span className="kicker tabular-nums text-accent/70">05</span>
-            <span className="kicker">Contact</span>
-            <span className="hairline hidden flex-1 sm:block" />
-          </div>
+      <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
+        <Reveal className="lg:col-span-7">
+          {/* Set in mono, not the display serif: an address is a value to be
+              copied, and the mono reads as one. */}
+          <a
+            href={`mailto:${site.email}`}
+            className="group block break-words font-mono text-[clamp(1.05rem,0.75rem+1.2vw,1.65rem)] tracking-tight text-ink"
+          >
+            <span className="border-b border-rule-strong pb-1.5 transition-colors group-hover:border-accent group-hover:text-accent">
+              {site.email}
+            </span>
+          </a>
+
+          <p className="t-sm mt-8 text-faint">{site.availability}</p>
         </Reveal>
 
-        <Reveal delay={60}>
-          <Spotlight className="glass mt-10 overflow-hidden">
-            <div className="grid gap-10 p-8 md:grid-cols-12 md:gap-8 md:p-12">
-              <div className="md:col-span-7">
-                <h2
-                  id="contact-title"
-                  className="mercury balance text-3xl font-medium tracking-[-0.03em] md:text-[2.6rem] md:leading-[1.08]"
-                >
-                  Hiring, or just want to argue about agents?
-                </h2>
-                <p className="pretty mt-5 max-w-md text-[0.98rem] leading-relaxed text-muted">
-                  Email is the fastest way to reach me. I reply to anything that
-                  isn&apos;t a template.
-                </p>
+        <Reveal delay={100} className="lg:col-span-5 lg:pl-2">
+          <p className="label mb-3">Elsewhere</p>
 
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <a href={`mailto:${site.email}`} className="btn btn-primary">
-                    <Mail className="h-4 w-4" />
-                    {site.email}
-                  </a>
+          <dl className="dossier">
+            {channels.map(({ label, handle, href }) => (
+              <div key={label}>
+                <dt className="label">{label}</dt>
+                <dd className="t-sm leading-snug">
                   <a
-                    href={site.links.linkedin}
+                    href={href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="btn btn-ghost"
+                    className="link"
                   >
-                    LinkedIn
-                    <ArrowUpRight className="h-3.5 w-3.5 opacity-60" />
+                    {handle}
+                    <span aria-hidden="true"> ↗</span>
                   </a>
-                </div>
-
-                <p className="mt-7 font-mono text-[0.7rem] uppercase tracking-[0.14em] text-faint">
-                  {site.availability}
-                </p>
+                </dd>
               </div>
-
-              <div className="md:col-span-5">
-                <p className="kicker">Elsewhere</p>
-                <ul className="mt-5 divide-y divide-line border-y border-line">
-                  {channels.map(({ label, handle, href, Icon }) => (
-                    <li key={label}>
-                      <a
-                        href={href}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className="group flex items-center gap-4 py-3.5 transition-colors"
-                      >
-                        <Icon className="h-4 w-4 shrink-0 text-faint transition-colors group-hover:text-accent" />
-                        <span className="text-[0.88rem] text-text">
-                          {label}
-                        </span>
-                        <span className="ml-auto truncate font-mono text-[0.72rem] text-faint">
-                          {handle}
-                        </span>
-                        <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-faint transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </Spotlight>
+            ))}
+          </dl>
         </Reveal>
       </div>
-    </section>
+    </Section>
   );
 }

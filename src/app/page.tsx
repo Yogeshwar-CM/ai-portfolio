@@ -6,14 +6,16 @@ import { About } from "@/components/about";
 import { Contact } from "@/components/contact";
 import { site } from "@/data/site";
 import { education } from "@/data/experience";
+import { studies } from "@/data/projects";
 
-const personSchema = {
-  "@context": "https://schema.org",
+const person = {
   "@type": "Person",
+  "@id": `${site.url}/#person`,
   name: site.name,
   jobTitle: "AI Engineer",
   email: `mailto:${site.email}`,
   url: site.url,
+  image: `${site.url}/opengraph-image`,
   worksFor: { "@type": "Organization", name: site.company },
   alumniOf: { "@type": "CollegeOrUniversity", name: education.school },
   address: {
@@ -21,6 +23,16 @@ const personSchema = {
     addressLocality: "Chennai",
     addressRegion: "Tamil Nadu",
     addressCountry: "IN",
+  },
+  // Availability, in the vocabulary a recruiter's tooling actually parses.
+  hasOccupation: {
+    "@type": "Occupation",
+    name: "AI Engineer",
+    occupationLocation: [
+      { "@type": "City", name: "Chennai" },
+      { "@type": "AdministrativeArea", name: "Remote" },
+    ],
+    skills: "Agentic systems, LLM orchestration, full-stack engineering",
   },
   sameAs: [
     site.links.github,
@@ -36,12 +48,41 @@ const personSchema = {
   ],
 };
 
+/* One graph rather than three loose blocks, so `@id` references resolve and
+   the Person is not re-declared per page type. */
+const homeSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    person,
+    {
+      "@type": "WebSite",
+      "@id": `${site.url}/#website`,
+      url: site.url,
+      name: `${site.name} — ${site.role}`,
+      inLanguage: "en",
+      publisher: { "@id": `${site.url}/#person` },
+    },
+    {
+      "@type": "ProfilePage",
+      url: site.url,
+      isPartOf: { "@id": `${site.url}/#website` },
+      mainEntity: { "@id": `${site.url}/#person` },
+      about: { "@id": `${site.url}/#person` },
+      hasPart: studies.map((project) => ({
+        "@type": "Article",
+        headline: project.title,
+        url: `${site.url}/work/${project.slug}`,
+      })),
+    },
+  ],
+};
+
 export default function Home() {
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }}
       />
       <Hero />
       <Work />

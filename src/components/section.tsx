@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
 import { Reveal } from "@/components/reveal";
 
+/**
+ * Section head as a document rubric: the index and label hold a narrow left
+ * column, the title and lede sit in the wide one. The asymmetry is the point —
+ * nothing on this site is centred.
+ */
 export function Section({
   id,
   index,
@@ -20,31 +25,29 @@ export function Section({
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="relative z-10 scroll-mt-24 border-t border-line/70 py-20 md:py-28"
+      className="section-y relative z-10 scroll-mt-20 border-t border-rule-strong"
     >
       <div className="shell">
         <Reveal>
-          <div className="flex items-center gap-4">
-            <span className="kicker tabular-nums text-accent/70">{index}</span>
-            <span className="kicker">{label}</span>
-            <span className="hairline hidden flex-1 sm:block" />
+          <div className="grid gap-4 lg:grid-cols-12 lg:gap-14">
+            <div className="lg:col-span-3">
+              <p className="label label-accent">{index}</p>
+              <p className="label mt-1.5">{label}</p>
+            </div>
+
+            <div className="lg:col-span-9">
+              <h2 id={`${id}-title`} className="t-h2 balance max-w-[20ch]">
+                {title}
+              </h2>
+
+              {lede ? (
+                <p className="pretty measure t-body mt-5 text-muted">{lede}</p>
+              ) : null}
+            </div>
           </div>
-
-          <h2
-            id={`${id}-title`}
-            className="mercury balance mt-6 text-3xl font-medium tracking-[-0.03em] md:text-[2.6rem] md:leading-[1.08]"
-          >
-            {title}
-          </h2>
-
-          {lede ? (
-            <p className="pretty measure mt-4 text-[0.975rem] leading-relaxed text-muted">
-              {lede}
-            </p>
-          ) : null}
         </Reveal>
 
-        <div className="mt-12 md:mt-14">{children}</div>
+        <div className="mt-14 md:mt-16">{children}</div>
       </div>
     </section>
   );

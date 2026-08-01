@@ -1,43 +1,100 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   Design tokens — ink + mercury, one electric accent
+   Design tokens — paper, ink, one rust
+   --------------------------------------------------------------------------
+   The page is a printed dossier: warm bone stock, near-black ink, and a single
+   rust that is only ever used to mark something. Hierarchy is carried by
+   scale, weight and tracking; colour is not asked to do that work.
    ========================================================================== */
 
 :root {
-  --ink-950: #060708;
-  --ink-900: #0a0b0d;
-  --ink-850: #0f1114;
-  --ink-800: #16181c;
+  color-scheme: light;
 
-  --line: rgba(255, 255, 255, 0.07);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  /* Stock */
+  --paper: #f4f1ea;
+  --paper-raised: #faf8f3;
+  --paper-sunk: #ebe6db;
 
-  --text: #f1f3f5;
-  --text-muted: #9aa1a9;
-  /* #7d848c keeps small metadata text at ~5.2:1 on the ink background (AA). */
-  --text-faint: #7d848c;
+  /* Ink. Contrast on --paper: 16.4 / 8.5 / 5.3 — all AA for normal text. */
+  --ink: #17130e;
+  --ink-muted: #4a443b;
+  --ink-faint: #6b6357;
 
-  --accent: #6ee7f9;
-  --accent-strong: #22d3ee;
+  /* Rules are ink at low alpha, never grey — they warm with the stock. */
+  --rule: rgba(23, 19, 14, 0.14);
+  --rule-strong: rgba(23, 19, 14, 0.3);
 
-  --radius: 14px;
-  --shell: 1120px;
+  /* The one accent. 6.1:1 on paper, so it is legible as body-size link text
+     and not merely decorative. */
+  --accent: #9c3b16;
+  --accent-deep: #7a2c10;
+  --accent-wash: rgba(156, 59, 22, 0.09);
+
+  --selection: rgba(156, 59, 22, 0.16);
+  --grain-blend: multiply;
+  --grain-opacity: 0.05;
+
+  /* Editorial geometry: near-square. A 14px radius is a SaaS card; a printed
+     rule box has none. 2px keeps focus rings from looking accidental. */
+  --radius: 2px;
+  --shell: 1180px;
   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* One fluid ramp, interpolated on viewport width, so nothing snaps at a
+     breakpoint. The display step is deliberately far above everything else —
+     the name should be the only thing on screen at that size. */
+  --step-xs: clamp(0.69rem, 0.67rem + 0.1vw, 0.74rem);
+  --step-sm: clamp(0.8rem, 0.78rem + 0.12vw, 0.86rem);
+  --step-base: clamp(0.94rem, 0.91rem + 0.16vw, 1.02rem);
+  --step-md: clamp(1.05rem, 1rem + 0.26vw, 1.2rem);
+  --step-lg: clamp(1.2rem, 1.1rem + 0.52vw, 1.5rem);
+  --step-xl: clamp(1.5rem, 1.28rem + 1vw, 2rem);
+  --step-2xl: clamp(1.9rem, 1.45rem + 2.2vw, 2.9rem);
+  --step-3xl: clamp(2.4rem, 1.7rem + 3.4vw, 4.1rem);
+  --step-4xl: clamp(3.1rem, 1.9rem + 5.6vw, 6.4rem);
+
+  --section-y: clamp(4.5rem, 3.4rem + 4.6vw, 7.5rem);
+}
+
+/* The paper is stock, not a theme toggle — at night it becomes ink-on-board
+   rather than switching to a different design. Same rust, same geometry. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --paper: #14120f;
+    --paper-raised: #1c1915;
+    --paper-sunk: #100e0c;
+
+    --ink: #f0ebe1;
+    --ink-muted: #b0a89b;
+    --ink-faint: #928979;
+
+    --rule: rgba(240, 235, 225, 0.14);
+    --rule-strong: rgba(240, 235, 225, 0.3);
+
+    --accent: #e06a34;
+    --accent-deep: #f08a58;
+    --accent-wash: rgba(224, 106, 52, 0.12);
+
+    --selection: rgba(224, 106, 52, 0.24);
+    --grain-blend: screen;
+    --grain-opacity: 0.035;
+  }
 }
 
 @theme inline {
-  --color-ink: var(--ink-900);
-  --color-ink-950: var(--ink-950);
-  --color-ink-850: var(--ink-850);
-  --color-ink-800: var(--ink-800);
-  --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
-  --color-text: var(--text);
-  --color-muted: var(--text-muted);
-  --color-faint: var(--text-faint);
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-sunk: var(--paper-sunk);
+  --color-ink: var(--ink);
+  --color-muted: var(--ink-muted);
+  --color-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
   --color-accent: var(--accent);
-  --color-accent-strong: var(--accent-strong);
+  --color-accent-deep: var(--accent-deep);
 
   --font-sans: var(--font-sans-var);
   --font-mono: var(--font-mono-var);
@@ -50,7 +107,7 @@
 
 @layer base {
   * {
-    border-color: var(--line);
+    border-color: var(--rule);
   }
 
   html {
@@ -60,44 +117,47 @@
 
   body {
     position: relative;
-    background-color: var(--ink-950);
-    color: var(--text);
+    background-color: var(--paper);
+    color: var(--ink);
     font-family: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--step-base);
+    line-height: 1.7;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "calt" 1, "liga" 1;
+    font-optical-sizing: auto;
     overflow-x: hidden;
   }
 
   ::selection {
-    background: var(--accent);
-    color: #05070a;
+    background: var(--selection);
+    color: var(--ink);
   }
 
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
-    border-radius: 4px;
+    border-radius: 1px;
   }
 
-  /* Thin, quiet scrollbar */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--ink-950);
+    background: var(--paper);
   }
   ::-webkit-scrollbar-thumb {
-    background: #23262b;
-    border: 3px solid var(--ink-950);
+    background: var(--rule-strong);
+    border: 4px solid var(--paper);
     border-radius: 99px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #33373d;
+    background: var(--ink-faint);
   }
 }
 
 /* ==========================================================================
-   Components — layered so Tailwind utilities can still override them
+   Components — layered so Tailwind utilities still win
    ========================================================================== */
 
 @layer components {
@@ -107,143 +167,144 @@
     width: 100%;
     max-width: var(--shell);
     margin-inline: auto;
-    padding-inline: 1.25rem;
+    padding-inline: 1.5rem;
   }
 
   @media (min-width: 768px) {
     .shell {
-      padding-inline: 2.5rem;
+      padding-inline: 3rem;
     }
   }
 
-  /* Hairline rails that frame the content column on large screens */
-  .rails::before,
-  .rails::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: linear-gradient(
-      to bottom,
-      transparent,
-      var(--line) 12%,
-      var(--line) 88%,
-      transparent
-    );
-    pointer-events: none;
-    z-index: 0;
-  }
-  .rails::before {
-    left: max(1.25rem, calc(50% - var(--shell) / 2 + 1px));
-  }
-  .rails::after {
-    right: max(1.25rem, calc(50% - var(--shell) / 2 + 1px));
-  }
-
-  @media (max-width: 1023px) {
-    .rails::before,
-    .rails::after {
-      display: none;
-    }
-  }
-
-  /* ---- Atmosphere ---- */
-
-  /* inset:0, not a bleed — it's fixed and never animates, so anything larger
-     than the viewport is paint area spent on pixels nobody sees. */
+  /* The page has one texture and no atmosphere: a fine tooth over the stock,
+     multiplied into it on paper and screened on board. Fixed and static, so
+     it costs one composite layer and never repaints. */
   .grain {
     position: fixed;
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* Anchored to the top of the document, not the viewport — the atmosphere
-     belongs to the hero and scrolls away with it. */
-  .atmos {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: min(1000px, 130svh);
-    overflow: hidden;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  .field {
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(var(--line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(
-      ellipse 80% 55% at 50% 0%,
-      #000 0%,
-      transparent 75%
-    );
-    -webkit-mask-image: radial-gradient(
-      ellipse 80% 55% at 50% 0%,
-      #000 0%,
-      transparent 75%
-    );
-    opacity: 0.55;
-  }
-
-  .aurora {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(
-        ellipse 60% 40% at 50% -10%,
-        rgba(180, 205, 220, 0.1),
-        transparent 70%
-      ),
-      radial-gradient(
-        ellipse 40% 30% at 85% 8%,
-        rgba(110, 231, 249, 0.07),
-        transparent 70%
-      );
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   /* ---- Type ---- */
 
-  .mercury {
-    background: linear-gradient(
-      177deg,
-      #ffffff 8%,
-      #e6e9ec 38%,
-      rgba(214, 220, 226, 0.62) 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* Fraunces, pinned. WONK on so the italic keeps its swashed descenders;
+     SOFT at 0 so terminals stay sharp rather than rounding into something
+     friendly. `opsz` tracks the size each class is actually set at — that is
+     the axis's whole job, and leaving it on `auto` under a fluid clamp gives
+     the browser a moving target. */
+  .display {
+    font-family: var(--font-display-var), "Iowan Old Style", Georgia, serif;
+    font-variation-settings: "opsz" 28, "SOFT" 0, "WONK" 1;
   }
 
-  .kicker {
+  .t-display {
+    font-family: var(--font-display-var), "Iowan Old Style", Georgia, serif;
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+    font-size: var(--step-4xl);
+    font-weight: 400;
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+  }
+
+  .t-title {
+    font-family: var(--font-display-var), "Iowan Old Style", Georgia, serif;
+    font-variation-settings: "opsz" 100, "SOFT" 0, "WONK" 1;
+    font-size: var(--step-3xl);
+    font-weight: 400;
+    line-height: 0.98;
+    letter-spacing: -0.028em;
+  }
+
+  .t-h2 {
+    font-family: var(--font-display-var), "Iowan Old Style", Georgia, serif;
+    font-variation-settings: "opsz" 72, "SOFT" 0, "WONK" 1;
+    font-size: var(--step-2xl);
+    font-weight: 400;
+    line-height: 1.06;
+    letter-spacing: -0.022em;
+  }
+
+  .t-h3 {
+    font-family: var(--font-display-var), "Iowan Old Style", Georgia, serif;
+    font-variation-settings: "opsz" 48, "SOFT" 0, "WONK" 1;
+    font-size: var(--step-xl);
+    /* The one display class set above 400. At this size it sits next to body
+       copy rather than above it, and regular weight reads as a paragraph that
+       happens to be large. */
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+
+  .t-lede {
+    font-size: var(--step-md);
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+  }
+
+  .t-body {
+    font-size: var(--step-base);
+    line-height: 1.75;
+  }
+
+  .t-sm {
+    font-size: var(--step-sm);
+    line-height: 1.6;
+  }
+
+  .t-xs {
+    font-size: var(--step-xs);
+    line-height: 1.5;
+  }
+
+  /* Every label, figure and index on the site. Mono, caps, wide — so metadata
+     is instantly separable from anything meant to be read as a sentence. */
+  .label {
     font-family: var(--font-mono-var), ui-monospace, monospace;
     font-size: 0.6875rem;
-    letter-spacing: 0.18em;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     font-variant-numeric: tabular-nums;
-    color: var(--text-faint);
+    color: var(--ink-faint);
   }
 
-  /* Reading measure. Long-form prose stops being readable past ~70 characters
-     regardless of how much column the grid hands it. */
+  .label-ink {
+    color: var(--ink);
+  }
+
+  .label-accent {
+    color: var(--accent);
+  }
+
+  /* Mono, but not caps. Stack lines are proper nouns — "TypeScript" and
+     "Next.js" carry their casing as part of the name, and upper-casing them
+     reads as carelessness to exactly the person who would notice. */
+  .meta {
+    font-family: var(--font-mono-var), ui-monospace, monospace;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    letter-spacing: 0.005em;
+    color: var(--ink-faint);
+  }
+
+  .num {
+    font-family: var(--font-mono-var), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
   .measure {
-    max-width: 66ch;
+    max-width: 68ch;
   }
 
   .measure-lead {
-    max-width: 54ch;
-  }
-
-  .serif {
-    font-family: var(--font-display-var), Georgia, serif;
+    max-width: 48ch;
   }
 
   .balance {
@@ -254,85 +315,69 @@
     text-wrap: pretty;
   }
 
-  /* ---- Surfaces ---- */
-
-  .glass {
-    position: relative;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.035),
-      rgba(255, 255, 255, 0.012)
-    );
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    backdrop-filter: blur(12px);
+  .section-y {
+    padding-block: var(--section-y);
   }
 
-  /* Top inner highlight — the detail that reads as "expensive" */
-  .glass::before {
-    content: "";
-    position: absolute;
-    inset-inline: 1px;
-    top: 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.22),
-      transparent
-    );
-    pointer-events: none;
+  /* Printed-page initial: the first letter drops three lines into the column.
+     Line-height and padding are tuned for Fraunces specifically — it is not a
+     generic drop cap and will need re-tuning if the display face changes. */
+  .dropcap::first-letter {
+    float: left;
+    font-family: var(--font-display-var), Georgia, serif;
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+    font-size: 3.5em;
+    line-height: 0.78;
+    font-weight: 400;
+    padding-right: 0.08em;
+    padding-top: 0.06em;
+    color: var(--ink);
   }
 
-  /* Closing glow behind the contact block. Needs a stacking context on the
-     parent (position + z-index) so the negative index stays contained. */
-  .halo {
-    position: absolute;
-    inset-inline: 0;
-    bottom: -10%;
-    height: 80%;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(
-      ellipse 55% 65% at 50% 100%,
-      rgba(110, 231, 249, 0.07),
-      transparent 70%
-    );
+  /* Pull quote. The opening quotation mark hangs into the margin so the first
+     character of the sentence stays flush with the column above it. */
+  .pull {
+    font-family: var(--font-display-var), Georgia, serif;
+    font-variation-settings: "opsz" 36, "SOFT" 0, "WONK" 1;
+    font-size: var(--step-lg);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--ink);
+    text-indent: -0.4em;
+    border-top: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule-strong);
+    padding-block: 1.4rem;
   }
+
+  /* ---- Rules & tables ---- */
 
   .hairline {
     height: 1px;
-    background: linear-gradient(
-      90deg,
-      var(--line-strong),
-      var(--line) 30%,
-      transparent
-    );
+    background: var(--rule);
   }
 
-  /* Pointer-tracked highlight */
-  .spot {
-    position: relative;
+  /* The dossier table: mono term in a fixed left column, value in the rest,
+     hairline between rows. Used for the hero panel, the case-study facts and
+     anywhere else a label/value pair appears — it is the site's one table. */
+  .dossier {
+    border-top: 1px solid var(--rule-strong);
   }
 
-  .spot::after {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity 380ms ease;
-    background: radial-gradient(
-      380px circle at var(--mx, 50%) var(--my, 50%),
-      rgba(110, 231, 249, 0.1),
-      transparent 62%
-    );
-    pointer-events: none;
+  .dossier > div {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 8rem) 1fr;
+    gap: 1rem;
+    align-items: baseline;
+    padding-block: 0.85rem;
+    border-bottom: 1px solid var(--rule);
   }
 
-  .spot:hover::after,
-  .spot:focus-within::after {
-    opacity: 1;
+  @media (max-width: 400px) {
+    .dossier > div {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
   }
 
   /* ---- Controls ---- */
@@ -341,144 +386,213 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    height: 2.75rem;
-    padding-inline: 1.15rem;
-    border-radius: 999px;
-    font-size: 0.875rem;
+    gap: 0.55rem;
+    height: 2.85rem;
+    padding-inline: 1.35rem;
+    border-radius: var(--radius);
+    font-size: var(--step-sm);
     font-weight: 500;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.01em;
     white-space: nowrap;
     transition:
-      transform 200ms var(--ease),
-      background-color 200ms ease,
-      border-color 200ms ease,
-      box-shadow 200ms ease,
-      color 200ms ease;
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
   }
 
-  .btn:active {
-    transform: translateY(1px);
+  .btn-ink {
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
   }
 
-  .btn-primary {
-    background: #f3f5f7;
-    color: #08090b;
-    border: 1px solid transparent;
-    box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.5) inset,
-      0 10px 30px -12px rgba(180, 210, 220, 0.55);
+  .btn-ink:hover {
+    background: var(--accent-deep);
+    border-color: var(--accent-deep);
+    color: var(--paper);
   }
 
-  .btn-primary:hover {
-    background: #ffffff;
-    box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.6) inset,
-      0 14px 38px -12px rgba(110, 231, 249, 0.55);
+  .btn-line {
+    border: 1px solid var(--rule-strong);
+    color: var(--ink);
+    background: transparent;
   }
 
-  .btn-ghost {
-    border: 1px solid var(--line-strong);
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.02);
+  .btn-line:hover {
+    border-color: var(--ink);
+    background: var(--accent-wash);
   }
 
-  .btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(110, 231, 249, 0.4);
+  /* Links read as links: underlined at rest, in ink, going rust on hover.
+     No draw-in animation — a portfolio is not the place to make someone hover
+     to find out what is clickable. */
+  .link {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--rule-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    transition:
+      color 160ms ease,
+      text-decoration-color 160ms ease;
   }
 
-  /* Underline that draws in on hover */
-  .link-draw {
+  .link:hover {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+  }
+
+  .link-quiet {
+    color: var(--ink-muted);
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .link-quiet:hover {
+    color: var(--accent);
+  }
+
+  /* Heading anchor — in the DOM always, revealed on hover for the mouse. */
+  .anchor {
+    margin-left: 0.4rem;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 160ms ease;
+  }
+
+  h2:hover > .anchor,
+  .anchor:focus-visible {
+    opacity: 1;
+  }
+
+  /* Table of contents. The rust marker rides the rule rather than shifting
+     the text, so the list never reflows as you read past a section. */
+  .toc-link {
     position: relative;
-    color: var(--text);
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding-block: 0.3rem;
+    color: var(--ink-muted);
     transition: color 200ms ease;
   }
-  .link-draw::after {
+
+  .toc-link::before {
+    content: "";
+    position: absolute;
+    left: calc(-1rem - 1px);
+    top: 0.45rem;
+    bottom: 0.45rem;
+    width: 2px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transition: transform 260ms var(--ease);
+  }
+
+  .toc-link:hover {
+    color: var(--ink);
+  }
+
+  .toc-link[aria-current="true"] {
+    color: var(--ink);
+  }
+
+  .toc-link[aria-current="true"]::before {
+    transform: scaleY(1);
+  }
+
+  /* ---- Work index ---- */
+
+  /* A numbered list of entries separated by rules — the composition is a
+     contents page, not a card grid. The summary is in the DOM at all sizes;
+     below `lg` it is simply always open, because there is no hover there. */
+  .entry {
+    display: block;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    padding-block: 1.6rem;
+    transition: background-color 220ms ease;
+  }
+
+  .entry::before {
     content: "";
     position: absolute;
     left: 0;
-    bottom: -2px;
+    top: -1px;
     height: 1px;
     width: 100%;
     background: var(--accent);
     transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 320ms var(--ease);
-  }
-  .link-draw:hover {
-    color: #fff;
-  }
-  .link-draw:hover::after {
-    transform: scaleX(1);
     transform-origin: left;
+    transition: transform 420ms var(--ease);
   }
 
-  .tag {
-    display: inline-flex;
-    align-items: center;
-    height: 1.5rem;
-    padding-inline: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.025);
-    font-family: var(--font-mono-var), ui-monospace, monospace;
-    font-size: 0.6875rem;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-muted);
-    white-space: nowrap;
+  .entry:hover::before,
+  .entry:focus-within::before {
+    transform: scaleX(1);
   }
 
-  /* Card hover: a 2px rise reads as responsive without becoming a bounce. */
-  .lift {
-    transition:
-      transform 400ms var(--ease),
-      border-color 300ms ease,
-      box-shadow 400ms var(--ease);
+  .entry-body {
+    display: grid;
+    grid-template-rows: 1fr;
   }
 
-  .lift:hover,
-  .lift:focus-within {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 44px -28px rgba(0, 0, 0, 0.9);
+  .entry-body > div {
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .entry-body {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition:
+        grid-template-rows 420ms var(--ease),
+        opacity 320ms ease;
+    }
+
+    .entry:hover .entry-body,
+    .entry:focus-within .entry-body {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
   }
 
   /* ---- Motion ---- */
 
+  /* Opacity and translate only. No blur, no scale — the content settles in,
+     it does not perform. */
   [data-reveal] {
     opacity: 0;
-    transform: translateY(14px);
-    /* The defocus is what separates this from a plain fade — it reads as the
-       content settling rather than switching on. Cleared once it lands so no
-       element is left rasterized behind a filter. */
-    filter: blur(5px);
+    transform: translateY(10px);
     transition:
-      opacity 700ms var(--ease),
-      transform 700ms var(--ease),
-      filter 500ms var(--ease);
+      opacity 620ms var(--ease),
+      transform 620ms var(--ease);
     transition-delay: var(--reveal-delay, 0ms);
   }
 
   [data-reveal="in"] {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 
-  .dot-live {
-    animation: pulse-dot 2.8s ease-in-out infinite;
+  /* Word-by-word entrance for the two headlines above the fold. A CSS
+     animation rather than an observer: this content is visible on load, so
+     waiting for JS would show it late on a slow connection. `forwards` means
+     the reduced-motion override (duration ~0) still lands on the end state. */
+  .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(0.18em);
+    animation: word-in 760ms var(--ease) forwards;
+    animation-delay: calc(var(--i, 0) * 70ms + 80ms);
   }
 }
 
-@keyframes pulse-dot {
-  0%,
-  100% {
+@keyframes word-in {
+  to {
     opacity: 1;
-    box-shadow: 0 0 0 0 rgba(110, 231, 249, 0.5);
-  }
-  50% {
-    opacity: 0.75;
-    box-shadow: 0 0 0 5px rgba(110, 231, 249, 0);
+    transform: none;
   }
 }
 
@@ -498,13 +612,19 @@
   [data-reveal] {
     opacity: 1 !important;
     transform: none !important;
-    filter: none !important;
   }
-  /* Zeroing the duration would leave this as an instant 2px jump on hover,
-     which is the jitter the preference is asking us to avoid. */
-  .lift:hover,
-  .lift:focus-within {
+  /* Duration is already ~0 above, but the stagger delay is not — without this
+     the headline would still appear one word at a time, just abruptly. */
+  .word {
+    animation: none !important;
+    opacity: 1 !important;
     transform: none !important;
+  }
+  /* A zero-duration row expansion is a jump-cut on hover, which is the jitter
+     the preference is asking us to avoid. Leave the entries open instead. */
+  .entry-body {
+    grid-template-rows: 1fr !important;
+    opacity: 1 !important;
   }
 }
 
@@ -514,6 +634,5 @@
   [data-reveal] {
     opacity: 1 !important;
     transform: none !important;
-    filter: none !important;
   }
 }
