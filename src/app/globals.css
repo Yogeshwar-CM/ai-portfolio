@@ -150,9 +150,11 @@
 
   /* ---- Atmosphere ---- */
 
+  /* inset:0, not a bleed — it's fixed and never animates, so anything larger
+     than the viewport is paint area spent on pixels nobody sees. */
   .grain {
     position: fixed;
-    inset: -50%;
+    inset: 0;
     z-index: 1;
     pointer-events: none;
     opacity: 0.035;
@@ -497,6 +499,12 @@
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
+  }
+  /* Zeroing the duration would leave this as an instant 2px jump on hover,
+     which is the jitter the preference is asking us to avoid. */
+  .lift:hover,
+  .lift:focus-within {
+    transform: none !important;
   }
 }
 

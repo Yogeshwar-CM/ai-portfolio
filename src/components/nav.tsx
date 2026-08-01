@@ -10,6 +10,7 @@ export function Nav() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let frame = 0;
@@ -64,9 +65,27 @@ export function Nav() {
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      // Dismissing with the keyboard should hand focus back to the control
+      // that opened the menu, not drop it at the top of the document.
+      toggleRef.current?.focus();
+    };
+
+    // The menu is md:hidden, so an open state that survives a resize to
+    // desktop leaves the header stuck in its expanded styling.
+    const media = window.matchMedia("(min-width: 768px)");
+    const onChange = () => media.matches && setOpen(false);
+    onChange();
+
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    media.addEventListener("change", onChange);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      media.removeEventListener("change", onChange);
+    };
   }, [open]);
 
   return (
@@ -137,6 +156,7 @@ export function Nav() {
             Get in touch
           </a>
           <button
+            ref={toggleRef}
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
