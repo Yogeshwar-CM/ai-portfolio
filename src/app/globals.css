@@ -15,7 +15,8 @@
 
   --text: #f1f3f5;
   --text-muted: #9aa1a9;
-  --text-faint: #6a7078;
+  /* #7d848c keeps small metadata text at ~5.2:1 on the ink background (AA). */
+  --text-faint: #7d848c;
 
   --accent: #6ee7f9;
   --accent-strong: #22d3ee;

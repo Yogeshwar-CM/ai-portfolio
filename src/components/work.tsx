@@ -120,7 +120,7 @@ export function Work() {
       index="01"
       label="Selected work"
       title="Things I built, and what actually came out of them."
-      lede="Three of these shipped, one won money, and none of them come with invented metrics. Where the detail is behind a company login, I say so instead of dressing it up."
+      lede="Two of these shipped, one won a grand prize, and none of them come with invented metrics. Where the detail sits behind a company login, I say so instead of dressing it up."
     >
       <div className="space-y-5">
         {featured.map((project, i) => (
