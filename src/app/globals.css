@@ -22,6 +22,7 @@
 
   --radius: 14px;
   --shell: 1120px;
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 @theme inline {
@@ -46,363 +47,366 @@
    Base
    ========================================================================== */
 
-* {
-  border-color: var(--line);
-}
+@layer base {
+  * {
+    border-color: var(--line);
+  }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-tap-highlight-color: transparent;
-}
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-body {
-  background-color: var(--ink-950);
-  color: var(--text);
-  font-family: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden;
-}
+  body {
+    background-color: var(--ink-950);
+    color: var(--text);
+    font-family: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
 
-::selection {
-  background: var(--accent);
-  color: #05070a;
-}
+  ::selection {
+    background: var(--accent);
+    color: #05070a;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
 
-/* Thin, quiet scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-track {
-  background: var(--ink-950);
-}
-::-webkit-scrollbar-thumb {
-  background: #23262b;
-  border: 3px solid var(--ink-950);
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #33373d;
-}
-
-/* ==========================================================================
-   Layout primitives
-   ========================================================================== */
-
-.shell {
-  width: 100%;
-  max-width: var(--shell);
-  margin-inline: auto;
-  padding-inline: 1.25rem;
-}
-
-@media (min-width: 768px) {
-  .shell {
-    padding-inline: 2.5rem;
+  /* Thin, quiet scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--ink-950);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #23262b;
+    border: 3px solid var(--ink-950);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #33373d;
   }
 }
 
-/* Hairline rails that frame the content column on large screens */
-.rails::before,
-.rails::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    var(--line) 12%,
-    var(--line) 88%,
-    transparent
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-.rails::before {
-  left: max(1.25rem, calc(50% - var(--shell) / 2 + 1px));
-}
-.rails::after {
-  right: max(1.25rem, calc(50% - var(--shell) / 2 + 1px));
-}
+/* ==========================================================================
+   Components — layered so Tailwind utilities can still override them
+   ========================================================================== */
 
-@media (max-width: 1023px) {
+@layer components {
+  /* ---- Layout ---- */
+
+  .shell {
+    width: 100%;
+    max-width: var(--shell);
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  /* Hairline rails that frame the content column on large screens */
   .rails::before,
   .rails::after {
-    display: none;
-  }
-}
-
-/* ==========================================================================
-   Atmosphere — grain, grid, glow
-   ========================================================================== */
-
-.grain {
-  position: fixed;
-  inset: -50%;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-.field {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(
-    ellipse 80% 55% at 50% 0%,
-    #000 0%,
-    transparent 75%
-  );
-  -webkit-mask-image: radial-gradient(
-    ellipse 80% 55% at 50% 0%,
-    #000 0%,
-    transparent 75%
-  );
-  opacity: 0.5;
-}
-
-.aurora {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      ellipse 60% 40% at 50% -10%,
-      rgba(180, 205, 220, 0.1),
-      transparent 70%
-    ),
-    radial-gradient(
-      ellipse 40% 30% at 85% 8%,
-      rgba(110, 231, 249, 0.07),
-      transparent 70%
+    content: "";
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--line) 12%,
+      var(--line) 88%,
+      transparent
     );
-}
+    pointer-events: none;
+    z-index: 0;
+  }
+  .rails::before {
+    left: max(1.25rem, calc(50% - var(--shell) / 2 + 1px));
+  }
+  .rails::after {
+    right: max(1.25rem, calc(50% - var(--shell) / 2 + 1px));
+  }
 
-/* ==========================================================================
-   Type
-   ========================================================================== */
+  @media (max-width: 1023px) {
+    .rails::before,
+    .rails::after {
+      display: none;
+    }
+  }
 
-.mercury {
-  background: linear-gradient(
-    177deg,
-    #ffffff 8%,
-    #e6e9ec 38%,
-    rgba(214, 220, 226, 0.62) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+  /* ---- Atmosphere ---- */
 
-.kicker {
-  font-family: var(--font-mono-var), ui-monospace, monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
+  .grain {
+    position: fixed;
+    inset: -50%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
 
-.serif {
-  font-family: var(--font-display-var), Georgia, serif;
-}
+  .field {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(
+      ellipse 80% 55% at 50% 0%,
+      #000 0%,
+      transparent 75%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse 80% 55% at 50% 0%,
+      #000 0%,
+      transparent 75%
+    );
+    opacity: 0.5;
+  }
 
-.balance {
-  text-wrap: balance;
-}
+  .aurora {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        ellipse 60% 40% at 50% -10%,
+        rgba(180, 205, 220, 0.1),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 40% 30% at 85% 8%,
+        rgba(110, 231, 249, 0.07),
+        transparent 70%
+      );
+  }
 
-.pretty {
-  text-wrap: pretty;
-}
+  /* ---- Type ---- */
 
-/* ==========================================================================
-   Surfaces
-   ========================================================================== */
+  .mercury {
+    background: linear-gradient(
+      177deg,
+      #ffffff 8%,
+      #e6e9ec 38%,
+      rgba(214, 220, 226, 0.62) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 
-.glass {
-  position: relative;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.035),
-    rgba(255, 255, 255, 0.012)
-  );
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  backdrop-filter: blur(12px);
-}
+  .kicker {
+    font-family: var(--font-mono-var), ui-monospace, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
 
-/* Top inner highlight — the detail that reads as "expensive" */
-.glass::before {
-  content: "";
-  position: absolute;
-  inset-inline: 1px;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.22),
-    transparent
-  );
-  pointer-events: none;
-}
+  .serif {
+    font-family: var(--font-display-var), Georgia, serif;
+  }
 
-.hairline {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    var(--line-strong),
-    var(--line) 30%,
-    transparent
-  );
-}
+  .balance {
+    text-wrap: balance;
+  }
 
-/* Pointer-tracked spotlight on cards */
-.spot::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity 380ms ease;
-  background: radial-gradient(
-    380px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(110, 231, 249, 0.1),
-    transparent 62%
-  );
-  pointer-events: none;
-}
+  .pretty {
+    text-wrap: pretty;
+  }
 
-.spot:hover::after,
-.spot:focus-within::after {
-  opacity: 1;
-}
+  /* ---- Surfaces ---- */
 
-/* ==========================================================================
-   Controls
-   ========================================================================== */
+  .glass {
+    position: relative;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.012)
+    );
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+  }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  height: 2.75rem;
-  padding-inline: 1.15rem;
-  border-radius: 999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  transition:
-    transform 200ms cubic-bezier(0.2, 0.7, 0.3, 1),
-    background-color 200ms ease,
-    border-color 200ms ease,
-    box-shadow 200ms ease,
-    color 200ms ease;
-}
+  /* Top inner highlight — the detail that reads as "expensive" */
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset-inline: 1px;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.22),
+      transparent
+    );
+    pointer-events: none;
+  }
 
-.btn:active {
-  transform: translateY(1px);
-}
+  .hairline {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      var(--line-strong),
+      var(--line) 30%,
+      transparent
+    );
+  }
 
-.btn-primary {
-  background: #f3f5f7;
-  color: #08090b;
-  border: 1px solid transparent;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 10px 30px -12px rgba(180, 210, 220, 0.55);
-}
+  /* Pointer-tracked highlight */
+  .spot {
+    position: relative;
+  }
 
-.btn-primary:hover {
-  background: #ffffff;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 14px 38px -12px rgba(110, 231, 249, 0.55);
-}
+  .spot::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 380ms ease;
+    background: radial-gradient(
+      380px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(110, 231, 249, 0.1),
+      transparent 62%
+    );
+    pointer-events: none;
+  }
 
-.btn-ghost {
-  border: 1px solid var(--line-strong);
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.02);
-}
+  .spot:hover::after,
+  .spot:focus-within::after {
+    opacity: 1;
+  }
 
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(110, 231, 249, 0.4);
-}
+  /* ---- Controls ---- */
 
-/* Underline that draws in on hover */
-.link-draw {
-  position: relative;
-  color: var(--text);
-  transition: color 200ms ease;
-}
-.link-draw::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  height: 1px;
-  width: 100%;
-  background: var(--accent);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 320ms cubic-bezier(0.2, 0.7, 0.3, 1);
-}
-.link-draw:hover {
-  color: #fff;
-}
-.link-draw:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.75rem;
+    padding-inline: 1.15rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    transition:
+      transform 200ms var(--ease),
+      background-color 200ms ease,
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      color 200ms ease;
+  }
 
-.tag {
-  display: inline-flex;
-  align-items: center;
-  height: 1.5rem;
-  padding-inline: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.025);
-  font-family: var(--font-mono-var), ui-monospace, monospace;
-  font-size: 0.6875rem;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
+  .btn:active {
+    transform: translateY(1px);
+  }
 
-/* ==========================================================================
-   Motion
-   ========================================================================== */
+  .btn-primary {
+    background: #f3f5f7;
+    color: #08090b;
+    border: 1px solid transparent;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.5) inset,
+      0 10px 30px -12px rgba(180, 210, 220, 0.55);
+  }
 
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(14px);
-  transition:
-    opacity 700ms cubic-bezier(0.2, 0.7, 0.3, 1),
-    transform 700ms cubic-bezier(0.2, 0.7, 0.3, 1);
-  transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
-}
+  .btn-primary:hover {
+    background: #ffffff;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      0 14px 38px -12px rgba(110, 231, 249, 0.55);
+  }
 
-[data-reveal="in"] {
-  opacity: 1;
-  transform: none;
+  .btn-ghost {
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(110, 231, 249, 0.4);
+  }
+
+  /* Underline that draws in on hover */
+  .link-draw {
+    position: relative;
+    color: var(--text);
+    transition: color 200ms ease;
+  }
+  .link-draw::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 1px;
+    width: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 320ms var(--ease);
+  }
+  .link-draw:hover {
+    color: #fff;
+  }
+  .link-draw:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    height: 1.5rem;
+    padding-inline: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.025);
+    font-family: var(--font-mono-var), ui-monospace, monospace;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* ---- Motion ---- */
+
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 700ms var(--ease),
+      transform 700ms var(--ease);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal="in"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .dot-live {
+    animation: pulse-dot 2.8s ease-in-out infinite;
+  }
 }
 
 @keyframes pulse-dot {
@@ -417,10 +421,7 @@ body {
   }
 }
 
-.dot-live {
-  animation: pulse-dot 2.8s ease-in-out infinite;
-}
-
+/* Unlayered on purpose: this must beat every utility and component rule. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -431,9 +432,10 @@ body {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
   [data-reveal] {
-    opacity: 1;
-    transform: none;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ai-portfolio
 
-## Getting Started
+Personal site for **Yogeshwar CM** — AI Engineer at Pickyourtrail, working on production agentic systems.
 
-First, run the development server:
+Dark, glass, one accent. Next.js App Router + TypeScript + Tailwind v4, no CMS, no motion library.
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm i
+npm run dev     # http://localhost:3000
+npm run build   # production build — must pass before shipping
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Editing content
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+All copy lives in typed files under `src/data/` — nothing is hardcoded in a component:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| File                    | What's in it                                              |
+| ----------------------- | --------------------------------------------------------- |
+| `src/data/site.ts`      | Name, headline, email, social links, nav                   |
+| `src/data/projects.ts`  | Selected work cards, case-study long form, open-source list |
+| `src/data/experience.ts`| Roles timeline and education                                |
+| `src/data/skills.ts`    | Skill groups, ordered agentic-first                        |
 
-## Learn More
+Adding a `study` block to a project automatically creates its case-study page at
+`/work/<slug>`, adds it to the sitemap, and links it from the work card.
 
-To learn more about Next.js, take a look at the following resources:
+## Design system
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Tokens are CSS custom properties in `src/app/globals.css` and exposed to Tailwind
+through `@theme inline`, so `text-muted`, `border-line` and `text-accent` work as
+normal utilities.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Ink** — `--ink-950` page, `--ink-900/850/800` surfaces
+- **Mercury** — `.mercury` gradient text for headings
+- **Accent** — a single electric cyan (`--accent`), used for signal only: focus
+  rings, live dots, hover underlines, the card spotlight
+- **Surfaces** — `.glass` (hairline border + top inner highlight), `.spot`
+  (pointer-tracked highlight), `.hairline`, `.tag`
+- Component CSS lives in `@layer components` so Tailwind utilities keep winning
+  when you override a `.btn` or `.glass` in JSX.
 
-## Deploy on Vercel
+Motion is CSS plus one `IntersectionObserver` (`src/components/reveal.tsx`).
+Everything collapses under `prefers-reduced-motion: reduce`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploying
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Static-friendly, Vercel-ready — no server runtime needed beyond Next defaults.
+
+Set `NEXT_PUBLIC_SITE_URL` to the real origin before deploying. It feeds
+`metadataBase`, canonical URLs, `sitemap.xml`, `robots.txt` and the JSON-LD
+`Person` schema; without it, those fall back to a placeholder domain.
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-domain.com npm run build
+```
+
+The OG image at `src/app/opengraph-image.tsx` is rendered to PNG at build time —
+edit that file rather than dropping in a static image.
+
+## Screenshots
+
+Not committed. To refresh one for the README, run `npm run dev`, take a shot of
+the hero at 1440×900 (dark), and save it to `public/screenshot.png`, then
+reference it here as `![Portfolio](public/screenshot.png)`.
