@@ -24,10 +24,13 @@ export function Work() {
         ))}
       </div>
 
+      {/* Not "all case studies" — this list already is all of them. The index
+          is worth the click for what it adds: every section of every study,
+          linked directly. */}
       <Reveal delay={60}>
         <p className="mt-6">
           <Link href="/work" className="label link-quiet">
-            All case studies →
+            Full index — every section, linked →
           </Link>
         </p>
       </Reveal>

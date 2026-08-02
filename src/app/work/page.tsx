@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { oss, projects, studies } from "@/data/projects";
+import { oss, projects, studies, type Project } from "@/data/projects";
 import { site } from "@/data/site";
+import { outline, readingTime, startYear } from "@/lib/study";
 import { Reveal } from "@/components/reveal";
+import { Rise } from "@/components/rise";
 import { Words } from "@/components/words";
-import { WorkEntry } from "@/components/work-entry";
+import { StudyIndexEntry } from "@/components/study-index";
 import { OssList } from "@/components/oss-list";
 
 const description =
@@ -34,17 +36,65 @@ export default function WorkIndex() {
      in the sitemap, and the breadcrumb target for every case study. */
   const schema = {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: `Selected work — ${site.name}`,
-    description,
-    url: `${site.url}/work`,
-    hasPart: studies.map((project) => ({
-      "@type": "Article",
-      headline: project.title,
-      description: project.summary,
-      url: `${site.url}/work/${project.slug}`,
-    })),
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        name: `Selected work — ${site.name}`,
+        description,
+        url: `${site.url}/work`,
+        author: { "@type": "Person", name: site.name, url: site.url },
+        hasPart: studies.map((project) => ({
+          "@type": "Article",
+          headline: project.title,
+          description: project.summary,
+          url: `${site.url}/work/${project.slug}`,
+          ...(project.study
+            ? {
+                articleSection: outline(project.study).map(
+                  (item) => item.heading,
+                ),
+                timeRequired: `PT${readingTime(project.study).minutes}M`,
+              }
+            : {}),
+        })),
+      },
+      /* Every case study declares a three-step trail through this page, and
+         this page declared none — so the one URL all four point at was the
+         only one in the set that could not render a breadcrumb in a result. */
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: site.url },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Selected work",
+            item: `${site.url}/work`,
+          },
+        ],
+      },
+    ],
   };
+
+  /* Grouped by the year the work started, newest first — the one axis the
+     home page's flat list does not give you. `2025 — present` buckets with
+     `2025` rather than opening a group of one. */
+  const byYear = new Map<string, Project[]>();
+  for (const project of projects) {
+    const year = startYear(project.year);
+    const bucket = byYear.get(year);
+    if (bucket) bucket.push(project);
+    else byYear.set(year, [project]);
+  }
+  const groups = [...byYear].sort(([a], [b]) => Number(b) - Number(a));
+
+  // Numbering runs across the whole index, not per group.
+  const position = new Map(projects.map((project, i) => [project.slug, i]));
+
+  const totalMinutes = studies.reduce(
+    (sum, project) => sum + readingTime(project.study!).minutes,
+    0,
+  );
 
   return (
     <div className="relative z-10 pb-24 pt-28 md:pt-36">
@@ -57,27 +107,59 @@ export default function WorkIndex() {
           <Link href="/" className="label link-quiet">
             ← Home
           </Link>
-          <p className="label">Index · {projects.length} entries</p>
+          <p className="label">
+            Index · {projects.length} entries · {totalMinutes} min in full
+          </p>
         </div>
 
         <h1 className="balance t-title mt-10">
           <Words text="Selected work" stagger={1.2} />
         </h1>
 
-        <Reveal delay={80}>
+        <Rise delay={80}>
           <p className="pretty measure t-lede mt-6 text-muted">
             Four builds with a case study each — what the thing was, how the
             pieces fit, the calls I made, and what I&apos;d do differently.
             Where the detail sits behind a company login, I say so instead of
             dressing it up.
           </p>
-        </Reveal>
+          <p className="pretty measure t-sm mt-4 text-faint">
+            Every section of every study is listed below and linked directly.
+            Skip to the part you came for.
+          </p>
+        </Rise>
 
-        <div className="mt-14 border-t border-rule">
-          {projects.map((project, i) => (
-            <Reveal key={project.slug} delay={i * 60}>
-              <WorkEntry project={project} index={i} />
-            </Reveal>
+        {/* One strong rule opens the index; after that the year rail is the
+            only divider between groups, because the entries already carry
+            their own rules and a second heavy line beside them reads as a
+            table that lost its columns. */}
+        <div className="mt-16 border-t border-rule-strong">
+          {groups.map(([year, entries], group) => (
+            <section
+              key={year}
+              aria-labelledby={`year-${year}`}
+              className={`grid gap-x-10 lg:grid-cols-12 ${
+                group ? "pt-12" : "pt-6"
+              }`}
+            >
+              <h2
+                id={`year-${year}`}
+                className="label num label-ink lg:sticky lg:top-24 lg:col-span-2 lg:self-start lg:pt-11"
+              >
+                {year}
+              </h2>
+
+              <div className="mt-5 lg:col-span-10 lg:mt-0">
+                {entries.map((project) => (
+                  <Reveal key={project.slug} delay={40}>
+                    <StudyIndexEntry
+                      project={project}
+                      index={position.get(project.slug) ?? 0}
+                    />
+                  </Reveal>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
 

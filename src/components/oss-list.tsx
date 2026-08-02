@@ -22,10 +22,15 @@ export function OssList({ items }: { items: readonly OssProject[] }) {
             <span className="text-faint"> ({repo.note})</span>
           ) : null}
           {i < items.length - 1 ? (
-            <span aria-hidden="true" className="text-faint">
-              {" "}
-              ·{" "}
-            </span>
+            <>
+              <span aria-hidden="true" className="text-faint">
+                {" "}
+                ·{" "}
+              </span>
+              {/* Hiding the middot also hides the spaces around it, which runs
+                  two repo names together for a screen reader. */}
+              <span className="sr-only">, </span>
+            </>
           ) : null}
         </Fragment>
       ))}

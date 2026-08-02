@@ -1,41 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { projects, studies, type Project } from "@/data/projects";
+import { projects, studies } from "@/data/projects";
 import { site } from "@/data/site";
+import { anchor, contentHash, outline, readingTime } from "@/lib/study";
 import { Reveal } from "@/components/reveal";
+import { Rise } from "@/components/rise";
 import { StudyToc } from "@/components/study-toc";
 import { Words } from "@/components/words";
 import { NewTab } from "@/components/new-tab";
 
 type Params = { params: Promise<{ slug: string }> };
-
-/** Stable ids for the in-page table of contents. */
-const anchor = (heading: string) =>
-  heading
-    .toLowerCase()
-    // Drop apostrophes rather than translating them into a separator, so
-    // "What I'd do differently" reads as `what-id-do-differently`.
-    .replace(/['’]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
-/**
- * Reading time from the study's own text. 220 wpm is the usual estimate for
- * screen reading; the floor of one minute keeps the short studies from
- * advertising "0 min".
- */
-function readingTime(study: NonNullable<Project["study"]>) {
-  const text = [
-    study.intro,
-    study.pullQuote,
-    ...study.sections.flatMap((section) => [section.heading, ...section.body]),
-    ...(study.decisions ?? []).flatMap((d) => [d.choice, d.over, d.why]),
-  ].join(" ");
-
-  const words = text.split(/\s+/).filter(Boolean).length;
-  return { words, minutes: Math.max(1, Math.round(words / 220)) };
-}
 
 export function generateStaticParams() {
   return studies.map((project) => ({ slug: project.slug }));
@@ -43,10 +18,33 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const project = projects.find((p) => p.slug === slug);
+  // `study` rather than the bare project: the route only renders — and only
+  // pre-renders — entries that have one, so anything else 404s and should not
+  // be handed a full metadata block on the way there.
+  const project = projects.find((p) => p.slug === slug && p.study);
   if (!project) return {};
 
   const title = `${project.title} · ${site.name}`;
+
+  /* The card itself is prerendered by the file convention, whose `alt` export
+     cannot see the slug — so all four studies shared one generic description.
+     Naming the same prerendered URL here overrides it with the study's own,
+     which is what a screen reader on a shared link actually reads out. */
+  const card = {
+    // Everything the card draws itself from, so the URL moves when it does.
+    url: `/work/${project.slug}/opengraph-image?${contentHash(
+      project.title,
+      project.summary,
+      project.kind,
+      project.year,
+      project.role,
+      project.stack.join(" "),
+    )}`,
+    type: "image/png",
+    width: 1200,
+    height: 630,
+    alt: `${project.title} — ${project.kind.toLowerCase()} case study by ${site.name}. ${project.summary}`,
+  };
 
   return {
     title: project.title,
@@ -57,6 +55,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       description: project.summary,
       url: `/work/${project.slug}`,
       type: "article",
+      // An `og:type` of article without these is a card that says it is an
+      // article and cannot say whose, or about what.
+      authors: [site.links.linkedin],
+      section: project.kind,
+      tags: project.stack,
+      images: [card],
     },
     // Without this the card inherits the root layout's twitter title, so every
     // shared case study would advertise itself as the home page.
@@ -65,6 +69,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       title,
       description: project.summary,
       creator: site.xHandle,
+      images: [card],
     },
   };
 }
@@ -75,10 +80,7 @@ export default async function CaseStudy({ params }: Params) {
   if (!project?.study) notFound();
 
   const study = project.study;
-  const toc = study.sections.map((section) => ({
-    id: anchor(section.heading),
-    heading: section.heading,
-  }));
+  const toc = outline(study);
   const { words, minutes } = readingTime(study);
 
   /* Cycle through the studies in order rather than always landing on the
@@ -101,9 +103,17 @@ export default async function CaseStudy({ params }: Params) {
         publisher: { "@type": "Person", name: site.name },
         url: `${site.url}/work/${project.slug}`,
         mainEntityOfPage: `${site.url}/work/${project.slug}`,
-        image: `${site.url}/work/${project.slug}/opengraph-image`,
+        // A bare URL string is legal here, but Google's article guidance asks
+        // for the dimensions, and a card it cannot size is a card it will not
+        // use as a thumbnail.
+        image: {
+          "@type": "ImageObject",
+          url: `${site.url}/work/${project.slug}/opengraph-image`,
+          width: 1200,
+          height: 630,
+        },
         about: project.stack,
-        articleSection: study.sections.map((s) => s.heading),
+        articleSection: toc.map((item) => item.heading),
         wordCount: words,
         timeRequired: `PT${minutes}M`,
         inLanguage: "en",
@@ -130,7 +140,13 @@ export default async function CaseStudy({ params }: Params) {
   };
 
   return (
-    <article className="relative z-10 pb-24 pt-28 md:pt-36">
+    /* An `article` with no accessible name is announced as an unlabelled
+       region, which is worse than no landmark — a screen reader lists it with
+       nothing to distinguish it from any other. It has a title; use it. */
+    <article
+      aria-labelledby="study-title"
+      className="relative z-10 pb-24 pt-28 md:pt-36"
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
@@ -147,11 +163,11 @@ export default async function CaseStudy({ params }: Params) {
           </p>
         </div>
 
-        <h1 className="balance t-title mt-10 max-w-[16ch]">
+        <h1 id="study-title" className="balance t-title mt-10 max-w-[16ch]">
           <Words text={project.title} stagger={0.9} />
         </h1>
 
-        <Reveal delay={80}>
+        <Rise delay={80}>
           <p className="pretty measure t-lede mt-6 text-muted">
             {project.summary}
           </p>
@@ -188,7 +204,7 @@ export default async function CaseStudy({ params }: Params) {
               </a>
             ) : null}
           </div>
-        </Reveal>
+        </Rise>
 
         <div className="mt-16 grid gap-12 lg:grid-cols-12 lg:gap-14">
           <Reveal delay={100} className="lg:col-span-8">
@@ -247,7 +263,7 @@ export default async function CaseStudy({ params }: Params) {
             {study.decisions?.length ? (
               <section id="decisions" className="mt-16 scroll-mt-24">
                 <p className="label label-accent">
-                  {String(study.sections.length + 1).padStart(2, "0")}
+                  {String(toc.length).padStart(2, "0")}
                 </p>
                 <h2 className="t-h3 mt-2 text-ink">
                   Calls I made

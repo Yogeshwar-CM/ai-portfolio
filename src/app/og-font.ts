@@ -53,13 +53,7 @@ export async function frauncesTTF(text: string) {
   }
 }
 
-/** Card palette — the site's tokens, restated because Satori has no CSS vars. */
-export const og = {
-  paper: "#f4f1ea",
-  ink: "#17130e",
-  muted: "#4a443b",
-  faint: "#6b6357",
-  rule: "rgba(23,19,14,0.16)",
-  ruleStrong: "rgba(23,19,14,0.32)",
-  accent: "#9c3b16",
-} as const;
+/* The card palette used to be seven hex literals here. It lives in
+   `src/data/tokens.ts` now, next to the check that keeps it in step with the
+   CSS — this module is about fonts. */
+export { og } from "@/data/tokens";

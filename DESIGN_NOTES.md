@@ -40,6 +40,27 @@ the sizes are fluid clamps, so `auto` would be chasing a moving target. Each
 class sets an optical size matching the px size it actually renders at —
 `t-display` at 144 down to `.display` at 28.
 
+The Fraunces italic is loaded as its own `next/font` instance with
+`preload: false`, under the same family name so `.pull` still resolves to it.
+As a `style` on the roman it preloaded on every route — 146 KB to set the
+case-study pull quotes, which are the only thing on the site that uses it, and
+which no visitor to the home page ever sees. The one italic that *was* above
+the fold, the hero blockquote, is set in the roman with a hanging quotation
+mark: `.quote`. Font preload per route went 323 KB → 176 KB.
+
+**The bottom of the ramp is pinned to 16px.** `--step-base` sets the body and
+the case studies are four to six minutes of continuous reading, most of it on a
+phone — which is also the viewport where the narrow end of every clamp lands,
+and where sub-16px inputs make iOS Safari zoom on focus. `--step-sm` carries
+real prose too (the hero's third paragraph, every `Outcome` line on the index),
+so its floor is 14px rather than 12.8.
+
+`.label` and `.meta` were the only sizes on the site not on the ramp, pinned at
+11px and 12.2px. They are fluid now — 11.2→12px and 12.8→13.6px. They are not
+ornament: they carry the study dateline, the year rail, the nav, every outcome
+tag and every project's stack, and uppercase at 0.14em tracking has to be given
+back the size the tracking takes away.
+
 ## Palette
 
 Warm neutrals sit on hue 73–89. The rust is the only thing anywhere near hue 40,
@@ -88,12 +109,25 @@ a toggle is a control that exists to be noticed.
 
 Opacity and translate. That is the entire vocabulary.
 
-The reveal is one `IntersectionObserver` per node, unobserved after it fires,
-with the visual state in CSS so `prefers-reduced-motion` is handled in one
-place. Under that preference the work-index folds stay open rather than
-snapping, since a zero-duration expansion is the jitter the preference is
-asking about. A `scripting: none` rule and a `<noscript>` block keep the page
-from rendering blank without JS.
+**Two entrances, split on whether the content is on screen at load.**
+
+`Reveal` is for everything below the fold: one `IntersectionObserver` per node,
+unobserved after it fires, with the visual state in CSS so
+`prefers-reduced-motion` is handled in one place.
+
+`Rise` is for everything above it. `Reveal` is a client component, so it cannot
+fire until React has hydrated — which meant the hero painted its name and then
+held the lede, the standing-details table and both calls to action at
+`opacity: 0` until the bundle landed. `Rise` is the same 10px on the same curve
+as a plain CSS animation: no observer, no client boundary, nothing in the path
+between paint and legibility. It is the argument the word-by-word headline
+animation was already making, applied to the rest of the fold. The hero is now
+a pure server component.
+
+Under `prefers-reduced-motion` both are cleared, and the work-index folds stay
+open rather than snapping — a zero-duration expansion is the jitter the
+preference is asking about. A `scripting: none` rule and a `<noscript>` block
+keep the page from rendering blank without JS; `Rise` needs neither.
 
 ## Print
 
@@ -115,6 +149,43 @@ Below `lg` the layout is already a single column with the work entries open, and
 print lays out at roughly 816px, so the screen rules do most of the work. What
 is left is colour, chrome and page breaks. External links print their href after
 the text; `mailto:` links already print their address as the link text.
+
+## What the build checks
+
+`npm run check` is lint, build, then `scripts/check-craft.mjs`, which reads
+`.next` rather than the source — so what it measures is what ships. It exists
+because `npm run build` stayed green through a page that was blank without
+JavaScript, a contents list one section short of the page it described, and a
+146 KB font on the critical path of every route.
+
+| Check | Fails when |
+| --- | --- |
+| `tokens` | the five hex values in `src/data/tokens.ts` have drifted from `:root` in `globals.css` — Satori cannot read CSS variables, so the share cards restate them, and nothing else notices when only one side is edited |
+| `fonts` | the woff2 preloaded on `/` exceeds 200 KB. This site has no images; fonts are the entire critical path, and the last regression here was one word added to a `next/font` call |
+| `noscript` | nothing in the shipped CSS or HTML clears `[data-reveal]` without JavaScript |
+| `prerender` | any case study or its share card is missing from `.next` — an on-demand card fetches Fraunces inside a social crawler's request, behind a `try/catch` that silently falls back to a system sans |
+
+The same three steps run in `.github/workflows/ci.yml` on every push and PR.
+
+## Accessibility notes
+
+Beyond focus rings, contrast and `prefers-reduced-motion`:
+
+- `<main>` carries `tabIndex={-1}`. Without it the skip link moves the scroll
+  but not keyboard focus, so the next Tab lands back in the masthead — the
+  exact navigation the link exists to bypass.
+- The skills taxonomy puts its grid on the `Reveal` wrapper itself. `dl` allows
+  one `div` around a term/value pair and not two; nested, the `dt`/`dd` pairs
+  stop being descendants the list can associate.
+- Decorative rust middots between terms are `aria-hidden`, which also removes
+  the only gap between them — so each is paired with an `sr-only` comma.
+  Otherwise a row reads out as "LLM orchestrationTool useEvals".
+- In-page markers use `aria-current="location"`, not `"true"`: the reader is
+  inside the part of the page the link points at, not on a different page.
+- The case-study `<article>` is labelled by its `<h1>`. An unnamed region is
+  worse than no landmark.
+- `↗` on an external link is `aria-hidden`, with "(opens in a new tab)" given
+  as `sr-only` text — the glyph was being read as part of the link name.
 
 ## What was killed
 

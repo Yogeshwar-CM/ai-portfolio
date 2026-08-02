@@ -13,9 +13,17 @@ const person = {
   "@id": `${site.url}/#person`,
   name: site.name,
   jobTitle: "AI Engineer",
+  // The knowledge-panel line. Without it Google writes its own from whatever
+  // it scrapes, which for a portfolio is usually the nav.
+  description: site.shortBio,
   email: `mailto:${site.email}`,
   url: site.url,
-  image: `${site.url}/opengraph-image`,
+  image: {
+    "@type": "ImageObject",
+    url: `${site.url}/opengraph-image`,
+    width: 1200,
+    height: 630,
+  },
   worksFor: { "@type": "Organization", name: site.company },
   alumniOf: { "@type": "CollegeOrUniversity", name: education.school },
   address: {

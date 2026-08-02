@@ -134,7 +134,9 @@ export function Nav() {
               <Link
                 key={item.href}
                 href={item.href}
-                aria-current={isActive ? "true" : undefined}
+                // `location`, not `true` or `page`: the reader is somewhere
+                // inside the page this points at, not on a different one.
+                aria-current={isActive ? "location" : undefined}
                 className={`label relative transition-colors hover:text-ink ${
                   isActive ? "text-ink" : ""
                 }`}

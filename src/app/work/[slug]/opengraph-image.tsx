@@ -5,6 +5,15 @@ import { charset, frauncesTTF, og } from "@/app/og-font";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+/* Deliberately generic, and deliberately still here.
+   `generateImageMetadata` is the API that can see the slug and would describe
+   each card by its own study — but adding it introduces a `[__metadata_id__]`
+   segment that drops all four cards out of the prerender manifest and into
+   on-demand rendering. These cards fetch Fraunces from Google Fonts to render;
+   doing that inside a request from a social crawler, behind a try/catch that
+   silently falls back to a system sans, is a worse card than a plain alt. The
+   per-study alt is set in `generateMetadata` instead, where it costs nothing. */
 export const alt = "Case study — Yogeshwar CM";
 
 export function generateStaticParams() {

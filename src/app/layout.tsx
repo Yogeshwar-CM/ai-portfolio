@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { site } from "@/data/site";
+import { tokens, tokensDark } from "@/data/tokens";
 import { Background } from "@/components/background";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
@@ -34,8 +35,22 @@ const display = Fraunces({
   variable: "--font-display-var",
   subsets: ["latin"],
   axes: ["SOFT", "WONK", "opsz"],
-  style: ["normal", "italic"],
   display: "swap",
+});
+
+/* The italic is its own instance for one reason: as a `style` on the roman it
+   preloaded on every route, and at 146 KB it was the largest asset on a site
+   with no images — larger than the roman it sits beside. It sets the
+   case-study pull quotes and nothing else, so `preload: false` keeps it off
+   the critical path of `/` and `/work` entirely and fetches it on the study
+   routes, where it is well below the fold and `swap` has room to do its job. */
+const displayItalic = Fraunces({
+  variable: "--font-display-italic-var",
+  subsets: ["latin"],
+  axes: ["SOFT", "WONK", "opsz"],
+  style: ["italic"],
+  display: "swap",
+  preload: false,
 });
 
 const description =
@@ -81,10 +96,13 @@ export const metadata: Metadata = {
   },
 };
 
+/* The stock, twice over — this tints the browser chrome, so a value that has
+   drifted from `--paper` shows as a seam along the top of the page. Read from
+   the same source the share cards use, which `check:craft` holds to the CSS. */
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f1ea" },
-    { media: "(prefers-color-scheme: dark)", color: "#14120f" },
+    { media: "(prefers-color-scheme: light)", color: tokens["--paper"] },
+    { media: "(prefers-color-scheme: dark)", color: tokensDark["--paper"] },
   ],
   colorScheme: "light dark",
 };
@@ -95,7 +113,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${mono.variable} ${display.variable} h-full antialiased`}
+      className={`${sans.variable} ${mono.variable} ${display.variable} ${displayItalic.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <a
@@ -112,7 +130,13 @@ export default function RootLayout({
         <Background />
         <Nav />
         <div id="top" />
-        <main id="main" className="flex-1">
+        {/* `tabIndex={-1}` is what makes the skip link actually skip. Without
+            it the browser moves the *scroll* to `#main` but leaves keyboard
+            focus where it was, so the next Tab lands back in the masthead —
+            the exact navigation the link exists to bypass. The ring is
+            suppressed because the destination is the whole document, and a
+            2px rust outline around the entire page reads as an error. */}
+        <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
           {children}
         </main>
         <Footer />

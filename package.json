@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:craft": "node scripts/check-craft.mjs",
+    "check": "npm run lint && npm run build && npm run check:craft"
   },
   "dependencies": {
     "next": "16.2.12",

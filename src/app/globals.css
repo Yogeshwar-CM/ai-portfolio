@@ -11,10 +11,12 @@
 :root {
   color-scheme: light;
 
-  /* Stock */
+  /* Stock.
+     The five values below are also declared as data in `src/data/tokens.ts`,
+     because Satori cannot read CSS variables and the share cards have to be
+     drawn on this same stock. `npm run check:craft` parses this block and
+     fails if the two have drifted — change one, change both. */
   --paper: #f4f1ea;
-  --paper-raised: #faf8f3;
-  --paper-sunk: #ebe6db;
 
   /* Ink. Contrast on --paper: 16.4 / 8.5 / 5.3 — all AA for normal text. */
   --ink: #17130e;
@@ -43,11 +45,18 @@
 
   /* One fluid ramp, interpolated on viewport width, so nothing snaps at a
      breakpoint. The display step is deliberately far above everything else —
-     the name should be the only thing on screen at that size. */
-  --step-xs: clamp(0.69rem, 0.67rem + 0.1vw, 0.74rem);
-  --step-sm: clamp(0.8rem, 0.78rem + 0.12vw, 0.86rem);
-  --step-base: clamp(0.94rem, 0.91rem + 0.16vw, 1.02rem);
-  --step-md: clamp(1.05rem, 1rem + 0.26vw, 1.2rem);
+     the name should be the only thing on screen at that size.
+
+     The bottom of the ramp is pinned to 16px rather than allowed to fall to
+     15: `--step-base` sets the body, and the case studies are four to six
+     minutes of continuous reading. The narrow end of this clamp is a phone,
+     which is where that reading actually happens and where sub-16px text is
+     also what makes iOS Safari zoom on focus. `--step-sm` carries real prose
+     too — the hero's third paragraph, every outcome line on the index — so it
+     goes to 14, not 12.8. */
+  --step-sm: clamp(0.875rem, 0.85rem + 0.12vw, 0.92rem);
+  --step-base: clamp(1rem, 0.97rem + 0.14vw, 1.06rem);
+  --step-md: clamp(1.12rem, 1.05rem + 0.3vw, 1.25rem);
   --step-lg: clamp(1.2rem, 1.1rem + 0.52vw, 1.5rem);
   --step-xl: clamp(1.5rem, 1.28rem + 1vw, 2rem);
   --step-2xl: clamp(1.9rem, 1.45rem + 2.2vw, 2.9rem);
@@ -64,8 +73,6 @@
     color-scheme: dark;
 
     --paper: #14120f;
-    --paper-raised: #1c1915;
-    --paper-sunk: #100e0c;
 
     --ink: #f0ebe1;
     --ink-muted: #b0a89b;
@@ -84,10 +91,39 @@
   }
 }
 
+/* The design leans on three tints of ink to carry hierarchy, and the faintest
+   of them clears AA by a margin that is comfortable rather than generous. A
+   reader who has asked their OS for more contrast is telling us that margin is
+   not enough for them: the two muted tints close most of the way to full ink,
+   the rules double in weight so the structure survives, and the accent darkens
+   to stay distinguishable from the ink it sits next to.
+
+   Nested rather than combined into one query, because a browser that supports
+   `prefers-contrast` still needs the stock chosen by `prefers-color-scheme`. */
+@media (prefers-contrast: more) {
+  :root {
+    --ink-muted: #2b261e;
+    --ink-faint: #3a342b;
+    --rule: rgba(23, 19, 14, 0.34);
+    --rule-strong: rgba(23, 19, 14, 0.62);
+    --accent: #8a3312;
+    --accent-wash: transparent;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink-muted: #ece6db;
+      --ink-faint: #d8d0c3;
+      --rule: rgba(240, 235, 225, 0.34);
+      --rule-strong: rgba(240, 235, 225, 0.62);
+      --accent: #f2915f;
+      --accent-wash: transparent;
+    }
+  }
+}
+
 @theme inline {
   --color-paper: var(--paper);
-  --color-paper-raised: var(--paper-raised);
-  --color-paper-sunk: var(--paper-sunk);
   --color-ink: var(--ink);
   --color-muted: var(--ink-muted);
   --color-faint: var(--ink-faint);
@@ -113,6 +149,11 @@
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+    /* The masthead is fixed, so an anchor landed on without this puts the
+       heading underneath it. Individual sections carry their own `scroll-mt`;
+       this is the floor, so a new anchor added without one still lands
+       somewhere a reader can see. */
+    scroll-padding-top: 5.5rem;
   }
 
   body {
@@ -260,16 +301,17 @@
     line-height: 1.6;
   }
 
-  .t-xs {
-    font-size: var(--step-xs);
-    line-height: 1.5;
-  }
-
   /* Every label, figure and index on the site. Mono, caps, wide — so metadata
-     is instantly separable from anything meant to be read as a sentence. */
+     is instantly separable from anything meant to be read as a sentence.
+
+     These two were the only sizes on the site not on the fluid ramp, pinned at
+     11px and 12.2px. That is fine for an ornament and not fine for what they
+     actually carry: the study dateline, the year rail, every `Outcome` line,
+     the whole nav, and the stack of each project. Uppercase at 0.14em tracking
+     needs the size back that the tracking takes away. */
   .label {
     font-family: var(--font-mono-var), ui-monospace, monospace;
-    font-size: 0.6875rem;
+    font-size: clamp(0.7rem, 0.68rem + 0.08vw, 0.75rem);
     font-weight: 500;
     line-height: 1.4;
     letter-spacing: 0.14em;
@@ -291,7 +333,7 @@
      reads as carelessness to exactly the person who would notice. */
   .meta {
     font-family: var(--font-mono-var), ui-monospace, monospace;
-    font-size: 0.76rem;
+    font-size: clamp(0.8rem, 0.78rem + 0.09vw, 0.85rem);
     line-height: 1.5;
     letter-spacing: 0.005em;
     color: var(--ink-faint);
@@ -338,10 +380,22 @@
     color: var(--ink);
   }
 
+  /* The hero's standing quote, set in the roman rather than the italic. It is
+     above the fold on the one page every visitor sees, and the italic is a
+     separate 146 KB face loaded only on the study routes — a swap there is a
+     worse trade than the upright. The optical size and the hanging mark do the
+     work the slant used to. */
+  .quote {
+    font-family: var(--font-display-var), "Iowan Old Style", Georgia, serif;
+    font-variation-settings: "opsz" 24, "SOFT" 0, "WONK" 1;
+    line-height: 1.5;
+    text-indent: -0.36em;
+  }
+
   /* Pull quote. The opening quotation mark hangs into the margin so the first
      character of the sentence stays flush with the column above it. */
   .pull {
-    font-family: var(--font-display-var), Georgia, serif;
+    font-family: var(--font-display-italic-var), Georgia, serif;
     font-variation-settings: "opsz" 36, "SOFT" 0, "WONK" 1;
     font-size: var(--step-lg);
     font-style: italic;
@@ -358,7 +412,8 @@
      fixed indent can — the offset tracks the actual glyph. The two would
      stack, so the manual indent is handed back at the same time. */
   @supports (hanging-punctuation: first) {
-    .pull {
+    .pull,
+    .quote {
       text-indent: 0;
       hanging-punctuation: first;
     }
@@ -508,11 +563,14 @@
     color: var(--ink);
   }
 
-  .toc-link[aria-current="true"] {
+  /* `location`, not `true`: the reader is not *on* this link, they are in the
+     part of the page it points at. That is the distinction the value exists
+     for, and it is what a screen reader announces as "current location". */
+  .toc-link[aria-current="location"] {
     color: var(--ink);
   }
 
-  .toc-link[aria-current="true"]::before {
+  .toc-link[aria-current="location"]::before {
     transform: scaleY(1);
   }
 
@@ -526,7 +584,19 @@
     position: relative;
     border-bottom: 1px solid var(--rule);
     padding-block: 1.6rem;
-    transition: background-color 220ms ease;
+  }
+
+  /* The row lights up at both ends: the rule draws in from the left and the
+     index figure takes the accent, so the number and the title — the two
+     things actually being pointed at — move together. (This replaces a
+     `background-color` transition that had no hover rule to animate.) */
+  .entry .num {
+    transition: color 220ms ease;
+  }
+
+  .entry:hover .num,
+  .entry:focus-within .num {
+    color: var(--accent);
   }
 
   .entry::before {
@@ -590,6 +660,22 @@
     transform: none;
   }
 
+  /* The same entrance as `[data-reveal]`, driven by CSS instead of by the
+     observer, for the blocks that are already on screen when the page loads.
+
+     `Reveal` cannot fire before React has hydrated, and it was being used on
+     the hero — so on a slow connection the first screen painted its headline
+     and then held the lede, the standing details and the call to action at
+     `opacity: 0` until the bundle arrived. That is the same argument the
+     word-in animation below is already making, applied to the rest of the
+     fold. It also costs no client JavaScript and needs no `scripting: none`
+     escape hatch, because there is nothing to escape. */
+  .rise {
+    opacity: 0;
+    animation: rise-in 640ms var(--ease) forwards;
+    animation-delay: var(--rise-delay, 0ms);
+  }
+
   /* Word-by-word entrance for the two headlines above the fold. A CSS
      animation rather than an observer: this content is visible on load, so
      waiting for JS would show it late on a slow connection. `forwards` means
@@ -604,6 +690,17 @@
 }
 
 @keyframes word-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
   to {
     opacity: 1;
     transform: none;
@@ -628,8 +725,10 @@
     transform: none !important;
   }
   /* Duration is already ~0 above, but the stagger delay is not — without this
-     the headline would still appear one word at a time, just abruptly. */
-  .word {
+     the headline would still appear one word at a time, just abruptly, and
+     the fold would still assemble itself in staggered jumps. */
+  .word,
+  .rise {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -675,8 +774,6 @@
      meaningless on paper. */
   :root {
     --paper: #ffffff;
-    --paper-raised: #ffffff;
-    --paper-sunk: #ffffff;
     --ink: #000000;
     --ink-muted: #26221c;
     --ink-faint: #4a443b;
@@ -722,7 +819,8 @@
 
   /* Nothing is mid-animation on paper. */
   [data-reveal],
-  .word {
+  .word,
+  .rise {
     opacity: 1 !important;
     transform: none !important;
     animation: none !important;

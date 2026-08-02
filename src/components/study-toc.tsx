@@ -55,7 +55,7 @@ export function StudyToc({ items }: { items: TocItem[] }) {
         <li key={item.id}>
           <a
             href={`#${item.id}`}
-            aria-current={active === item.id ? "true" : undefined}
+            aria-current={active === item.id ? "location" : undefined}
             className="toc-link t-sm"
           >
             <span className="label">{String(i + 1).padStart(2, "0")}</span>

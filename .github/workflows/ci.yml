@@ -1,0 +1,36 @@
+name: CI
+
+# The quality bar in CLAUDE.md was enforced entirely by whoever was reviewing
+# at the time. That is how a page that was blank without JavaScript shipped
+# past a green build, and how a 146 KB font sat on the critical path of every
+# route for a week. Lint and build catch neither; `check:craft` does.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      # Reads `.next`, so it has to run after the build — what it measures is
+      # what ships, not what the source implies.
+      - name: Craft checks
+        run: npm run check:craft

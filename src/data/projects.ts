@@ -187,12 +187,22 @@ export const projects: Project[] = [
         "A grand prize (₹51,000) for an AI agent build. Hackathons are not production, and I do not pretend otherwise — but they are an unusually honest test of whether you can scope something and finish it.",
       pullQuote:
         "Every team that lost had a better idea than they had a demo.",
+      /* Two theses were sitting under one heading that named neither of them.
+         Split, so the contents list says what is actually in the page and a
+         skimmer gets the argument from the headings alone. This is structure,
+         not added depth — the study is still the shortest of the four, and
+         the missing sections are ones only Yogeshwar can write. */
       sections: [
         {
-          heading: "What it taught me",
+          heading: "Scope is the whole skill",
           body: [
-            "Scope is the whole skill. Every team that lost had a better idea than they had a demo. The constraint forces you to pick the one path through the product that has to work and defend it against your own feature ideas.",
-            "Agents demo well and break quietly. The version that wins on stage and the version that survives a week of real users are different pieces of software, and knowing that gap exists is most of what I took away from it.",
+            "Every team that lost had a better idea than they had a demo. The constraint forces you to pick the one path through the product that has to work and defend it against your own feature ideas.",
+          ],
+        },
+        {
+          heading: "Agents demo well and break quietly",
+          body: [
+            "The version that wins on stage and the version that survives a week of real users are different pieces of software, and knowing that gap exists is most of what I took away from it.",
           ],
         },
       ],
