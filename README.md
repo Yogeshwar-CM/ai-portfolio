@@ -1,76 +1,26 @@
-# ai-portfolio
+# Yogeshwar CM — portfolio
 
-Personal site for **Yogeshwar CM** — AI Engineer at Pickyourtrail, working on production agentic systems.
+A static portfolio with an interactive SVG system map. All four service descriptions are in the initial HTML. JavaScript only selects a workflow and controls motion; without it, every explanation and contact link remains available.
 
-An editorial dossier — paper, ink, one rust. Next.js App Router + TypeScript +
-Tailwind v4, no CMS, no motion library. Design rationale lives in
-[DESIGN_NOTES.md](DESIGN_NOTES.md).
+## Local preview
 
-## Run it
+Run `python3 -m http.server 3000`, then open http://localhost:3000.
 
-```bash
-npm i
-npm run dev     # http://localhost:3000
-npm run build   # production build — must pass before shipping
-npm run lint
+Run `node verify.mjs` for interaction, accessibility-reference, SEO-content, contrast, and responsive-rule checks. These are source and behaviour checks, not browser layout or Lighthouse measurements.
+
+## Production build
+
+Once the final domain is known, run:
+
+```sh
+node verify.mjs
+node build.mjs https://your-domain.com
 ```
 
-## Editing content
+Deploy only `dist/` to a static host. The build adds the actual canonical URL, social image URLs, profile URL, robots.txt, and sitemap.xml. It requires an HTTPS origin; no domain is assumed in the development page.
 
-All copy lives in typed files under `src/data/` — nothing is hardcoded in a component:
+The favicon and 1200 × 630 social preview are local assets. There are no external fonts, runtime dependencies, analytics trackers, or animation render loops.
 
-| File                    | What's in it                                              |
-| ----------------------- | --------------------------------------------------------- |
-| `src/data/site.ts`      | Name, headline, email, social links, nav                   |
-| `src/data/projects.ts`  | Selected work cards, case-study long form, open-source list |
-| `src/data/experience.ts`| Roles timeline and education                                |
-| `src/data/skills.ts`    | Skill groups, ordered agentic-first                        |
+After deployment, check the real page on desktop and mobile, validate structured data, and submit the sitemap in Search Console. Hosting compression, caching, security headers, and real Core Web Vitals remain deployment checks.
 
-Adding a `study` block to a project automatically creates its case-study page at
-`/work/<slug>`, adds it to the sitemap, and links it from the work index.
-
-## Design system
-
-Tokens are CSS custom properties in `src/app/globals.css`, exposed to Tailwind
-through `@theme inline`, so `text-ink`, `text-muted`, `border-rule` and
-`text-accent` work as normal utilities. Dark is the same design on darker stock,
-driven by `prefers-color-scheme` — every component uses tokens, never a raw
-white or black alpha, so both schemes stay in sync by construction.
-
-- **Stock** — `--paper`, `--paper-raised`, `--paper-sunk`
-- **Ink** — `--ink`, `--ink-muted`, `--ink-faint` (AA at the sizes each is used)
-- **Accent** — one rust (`--accent`), used only to mark: section indices,
-  outcomes, focus rings, the rule that draws under the hovered row
-- **Type** — Fraunces (display), IBM Plex Sans (body), IBM Plex Mono (labels);
-  set with `.t-display` … `.t-xs`, `.display`, `.label`, `.num`
-- **Structures** — `.dossier` (the label/value table), `.entry` (work index
-  row), `.pull`, `.dropcap`, `.hairline`
-- Component CSS lives in `@layer components` so Tailwind utilities keep winning
-  when you override a `.btn` or `.label` in JSX.
-
-Motion is CSS plus one `IntersectionObserver` (`src/components/reveal.tsx`) —
-opacity and translate only. Everything collapses under
-`prefers-reduced-motion: reduce`.
-
-## Deploying
-
-Static-friendly, Vercel-ready — no server runtime needed beyond Next defaults.
-
-Set `NEXT_PUBLIC_SITE_URL` to the real origin before deploying. It feeds
-`metadataBase`, canonical URLs, `sitemap.xml`, `robots.txt` and the JSON-LD
-`Person` schema; without it, those fall back to a placeholder domain.
-
-```bash
-NEXT_PUBLIC_SITE_URL=https://your-domain.com npm run build
-```
-
-The OG image at `src/app/opengraph-image.tsx` is rendered to PNG at build time —
-edit that file rather than dropping in a static image. It pulls Fraunces as TTF
-from Google Fonts during the build (`src/app/og-font.ts`); if that fetch fails
-the card still renders, just in the fallback sans.
-
-## Screenshots
-
-Not committed. To refresh one for the README, run `npm run dev`, take a shot of
-the hero at 1440×900, and save it to `public/screenshot.png`, then reference it
-here as `![Portfolio](public/screenshot.png)`.
+The previous Next.js portfolio is preserved on the `previous-nextjs-portfolio` branch.
