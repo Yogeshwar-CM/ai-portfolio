@@ -14,7 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Portfolio checks
-        run: node verify.mjs
-      - name: Production build smoke test
-        run: node build.mjs https://portfolio-ci.invalid
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Validate portfolio
+        run: npm run check
