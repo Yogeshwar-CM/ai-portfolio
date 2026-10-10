@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 const html = fs.readFileSync('index.html', 'utf8');
 const scripts = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)];
 const schema = JSON.parse(scripts.find(match => match[1].includes('application/ld+json'))[2]);
@@ -80,12 +79,9 @@ for (const text of [palette.ink, palette.secondary, palette.muted, palette.signa
 }
 assert.equal((html.match(/class="route-output"/g) || []).length, 4);
 assert.ok(html.includes('.route-output{opacity:0}.route.is-active .route-output{opacity:1}'), 'Only the selected system should connect to the explanation');
-const preview = fs.readFileSync('social-preview.png');
+const preview = fs.readFileSync('public/social-preview.png');
 assert.equal(preview.subarray(1, 4).toString(), 'PNG');
 assert.equal(preview.readUInt32BE(16), 1200);
 assert.equal(preview.readUInt32BE(20), 630);
-for (const invalid of ['', 'http://example.com', 'https://example.com/path', 'https://user:pass@example.com', 'https://example.com/?x=1']) {
-  const result = spawnSync(process.execPath, ['build.mjs', invalid], { encoding: 'utf8' });
-  assert.equal(result.status, 1, 'Production URL must be validated: ' + invalid);
-}
-console.log('PASS: four workflows, inline panel selection, keyboard and motion controls, static SEO content, references, responsive rules, contrast, social image, and production URL validation.');
+assert.ok(fs.existsSync('public/favicon.svg'), 'Favicon must be publicly served');
+console.log('PASS: four workflows, inline panel selection, keyboard and motion controls, static SEO content, references, responsive rules, contrast, and public social assets.');

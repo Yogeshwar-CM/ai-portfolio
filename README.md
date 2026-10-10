@@ -4,20 +4,19 @@ A static portfolio with an interactive SVG system map. All four service descript
 
 ## Local preview
 
-Run `python3 -m http.server 3000`, then open http://localhost:3000.
+Run `npm install`, then `npm run dev` and open http://localhost:3000.
 
-Run `node verify.mjs` for interaction, accessibility-reference, SEO-content, contrast, and responsive-rule checks. These are source and behaviour checks, not browser layout or Lighthouse measurements.
+Run `npm run check` for lint, production build, interaction, accessibility-reference, SEO-content, contrast, and responsive-rule checks. These are source and behaviour checks, not browser layout or Lighthouse measurements.
 
 ## Production build
 
 Once the final domain is known, run:
 
 ```sh
-node verify.mjs
-node build.mjs https://your-domain.com
+npm run check
 ```
 
-Deploy only `dist/` to a static host. The build adds the actual canonical URL, social image URLs, profile URL, robots.txt, and sitemap.xml. It requires an HTTPS origin; no domain is assumed in the development page.
+Deploy on Vercel with the default Next.js settings. The project includes Vercel Analytics and Speed Insights, with no environment variables required.
 
 The favicon and 1200 × 630 social preview are local assets. There are no external fonts, runtime dependencies, analytics trackers, or animation render loops.
 
